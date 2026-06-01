@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{3F18E191-7C37-DCEE-23AE-BDAE41A3F676}</ProjectGuid>
+    <ProjectGuid>{9CF5B4F2-BBD3-3091-497E-E2819C1840D3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Unity.XR.PICO</AssemblyName>

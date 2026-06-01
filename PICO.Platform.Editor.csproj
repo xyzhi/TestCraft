@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{0F3B4598-49AD-1D2B-FF78-CFB5034DB09E}</ProjectGuid>
+    <ProjectGuid>{7724C9B8-C0A6-E418-61DB-3FB17C62298F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>PICO.Platform.Editor</AssemblyName>
@@ -1001,15 +1001,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Unity.XR.PICO.Editor.csproj">
-      <Project>{A9F49663-5E38-378A-B9B5-8CCB2DD5D6B7}</Project>
+      <Project>{9E8E0873-B3F6-CA62-26D3-1A15D8A0EF98}</Project>
       <Name>Unity.XR.PICO.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="Unity.XR.PICO.csproj">
-      <Project>{3F18E191-7C37-DCEE-23AE-BDAE41A3F676}</Project>
+      <Project>{9CF5B4F2-BBD3-3091-497E-E2819C1840D3}</Project>
       <Name>Unity.XR.PICO</Name>
     </ProjectReference>
     <ProjectReference Include="PICO.Platform.csproj">
-      <Project>{1BF16AA2-7B00-4D4B-0C8B-60B846D111DB}</Project>
+      <Project>{4DAE724B-68DD-D3E8-DDA8-C14D766199C6}</Project>
       <Name>PICO.Platform</Name>
     </ProjectReference>
   </ItemGroup>

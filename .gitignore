@@ -1,5 +1,7 @@
 Library/
 Logs/
+Temp/
 obj/
 .vs/
+ParallelCascades/
 Packages/PICO Unity Integration SDK-3.0.0-240902/

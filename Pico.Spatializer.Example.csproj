@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{DF298A68-C6E6-2082-29AF-46598C84AA8D}</ProjectGuid>
+    <ProjectGuid>{EA05AD66-FC65-8FA8-0621-51BA76CF8B3F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Pico.Spatializer.Example</AssemblyName>

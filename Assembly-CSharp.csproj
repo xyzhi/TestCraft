@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{862B9637-D575-6D90-4DBF-4EEBA96D8117}</ProjectGuid>
+    <ProjectGuid>{5BE1F106-3559-9D7E-AFC7-CBFB1AE5894A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -1203,35 +1203,35 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Pico.Spatializer.Editor.csproj">
-      <Project>{90DCE05B-0726-A07D-8891-D477D26EEED8}</Project>
+      <Project>{BEA006D7-8A6F-8114-6B7A-407F8F3CA2FA}</Project>
       <Name>Pico.Spatializer.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="PICO.Platform.Editor.csproj">
-      <Project>{0F3B4598-49AD-1D2B-FF78-CFB5034DB09E}</Project>
+      <Project>{7724C9B8-C0A6-E418-61DB-3FB17C62298F}</Project>
       <Name>PICO.Platform.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="Pico.Spatializer.csproj">
-      <Project>{8596CDF1-E3B8-D843-58CB-D4660C5E4916}</Project>
+      <Project>{032055BE-0AC9-5DD8-1B4B-4A1C30B69F9E}</Project>
       <Name>Pico.Spatializer</Name>
     </ProjectReference>
     <ProjectReference Include="PICO.TobSupport.csproj">
-      <Project>{79A67ECC-E9B4-93C4-1397-9484E96C44A6}</Project>
+      <Project>{3BD65B8E-7F34-2331-6623-F77471AF45BB}</Project>
       <Name>PICO.TobSupport</Name>
     </ProjectReference>
     <ProjectReference Include="PICO.Platform.csproj">
-      <Project>{1BF16AA2-7B00-4D4B-0C8B-60B846D111DB}</Project>
+      <Project>{4DAE724B-68DD-D3E8-DDA8-C14D766199C6}</Project>
       <Name>PICO.Platform</Name>
     </ProjectReference>
     <ProjectReference Include="Pico.Spatializer.Example.csproj">
-      <Project>{DF298A68-C6E6-2082-29AF-46598C84AA8D}</Project>
+      <Project>{EA05AD66-FC65-8FA8-0621-51BA76CF8B3F}</Project>
       <Name>Pico.Spatializer.Example</Name>
     </ProjectReference>
     <ProjectReference Include="Unity.XR.PICO.Editor.csproj">
-      <Project>{A9F49663-5E38-378A-B9B5-8CCB2DD5D6B7}</Project>
+      <Project>{9E8E0873-B3F6-CA62-26D3-1A15D8A0EF98}</Project>
       <Name>Unity.XR.PICO.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="Unity.XR.PICO.csproj">
-      <Project>{3F18E191-7C37-DCEE-23AE-BDAE41A3F676}</Project>
+      <Project>{9CF5B4F2-BBD3-3091-497E-E2819C1840D3}</Project>
       <Name>Unity.XR.PICO</Name>
     </ProjectReference>
   </ItemGroup>

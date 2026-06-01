@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{8596CDF1-E3B8-D843-58CB-D4660C5E4916}</ProjectGuid>
+    <ProjectGuid>{032055BE-0AC9-5DD8-1B4B-4A1C30B69F9E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Pico.Spatializer</AssemblyName>
@@ -955,7 +955,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Unity.XR.PICO.csproj">
-      <Project>{3F18E191-7C37-DCEE-23AE-BDAE41A3F676}</Project>
+      <Project>{9CF5B4F2-BBD3-3091-497E-E2819C1840D3}</Project>
       <Name>Unity.XR.PICO</Name>
     </ProjectReference>
   </ItemGroup>

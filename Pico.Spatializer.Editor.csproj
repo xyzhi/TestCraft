@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{90DCE05B-0726-A07D-8891-D477D26EEED8}</ProjectGuid>
+    <ProjectGuid>{BEA006D7-8A6F-8114-6B7A-407F8F3CA2FA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Pico.Spatializer.Editor</AssemblyName>
@@ -988,7 +988,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Pico.Spatializer.csproj">
-      <Project>{8596CDF1-E3B8-D843-58CB-D4660C5E4916}</Project>
+      <Project>{032055BE-0AC9-5DD8-1B4B-4A1C30B69F9E}</Project>
       <Name>Pico.Spatializer</Name>
     </ProjectReference>
   </ItemGroup>
