@@ -60,7 +60,7 @@
     <Analyzer Include="D:\Program Files\Unity\Editor\2022.3.61f1c1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Editor\OneShotCopyStarFighterRootComponents.cs" />
+    <Compile Include="Assets\Editor\XRDeviceSimulatorConfigurator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -1241,6 +1241,14 @@
       <Project>{4DAE724B-68DD-D3E8-DDA8-C14D766199C6}</Project>
       <Name>PICO.Platform</Name>
     </ProjectReference>
+    <ProjectReference Include="Unity.XR.Interaction.Toolkit.Samples.StarterAssets.csproj">
+      <Project>{988A8699-4A08-A88A-A794-88E5FB74D4DD}</Project>
+      <Name>Unity.XR.Interaction.Toolkit.Samples.StarterAssets</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.XR.Interaction.Toolkit.Samples.StarterAssets.Editor.csproj">
+      <Project>{6CC66E94-4EFF-A2BB-EB8F-9479635E4FF5}</Project>
+      <Name>Unity.XR.Interaction.Toolkit.Samples.StarterAssets.Editor</Name>
+    </ProjectReference>
     <ProjectReference Include="Pico.Spatializer.Example.csproj">
       <Project>{EA05AD66-FC65-8FA8-0621-51BA76CF8B3F}</Project>
       <Name>Pico.Spatializer.Example</Name>
@@ -1252,6 +1260,10 @@
     <ProjectReference Include="Unity.XR.PICO.csproj">
       <Project>{9CF5B4F2-BBD3-3091-497E-E2819C1840D3}</Project>
       <Name>Unity.XR.PICO</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.XR.Interaction.Toolkit.Samples.DeviceSimulator.csproj">
+      <Project>{1B7615DD-ABBF-A2FC-FFB6-FD19FA2BEA10}</Project>
+      <Name>Unity.XR.Interaction.Toolkit.Samples.DeviceSimulator</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

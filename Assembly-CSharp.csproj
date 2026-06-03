@@ -77,6 +77,7 @@
     <Compile Include="Assets\AirStrike\Scripts\Componet\Spawner.cs" />
     <Compile Include="Assets\AirStrike\Scripts\AI\AILook.cs" />
     <Compile Include="Assets\AirStrike\Scripts\WeaponSystem\WeaponBase.cs" />
+    <Compile Include="Assets\AirStrike\Scripts\Player\VRHeadPoseConstraint.cs" />
     <Compile Include="Assets\AirStrike\Scripts\WeaponSystem\FlashLight.cs" />
     <Compile Include="Assets\AirStrike\Scripts\FlightSystem\FlightView.cs" />
     <Compile Include="Assets\AirStrike\Scripts\WeaponSystem\Damage.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="Assets\AirStrike\Scripts\Componet\TouchScreenVal.cs" />
     <Compile Include="Assets\AirStrike\Standard Assets\RealExplosive\Sources\Scripts\FX_ParticlePreview.cs" />
     <Compile Include="Assets\AirStrike\Scripts\Componet\FlashLight.cs" />
+    <Compile Include="Assets\AirStrike\Scripts\Player\VRAimProvider.cs" />
     <Compile Include="Assets\AirStrike\Scripts\WeaponSystem\RayShoot.cs" />
     <Compile Include="Assets\AirStrike\Scripts\FlightIndicator\Indicator.cs" />
     <Compile Include="Assets\AirStrike\Scripts\Componet\RadarSystem.cs" />
@@ -1222,6 +1224,14 @@
       <Project>{4DAE724B-68DD-D3E8-DDA8-C14D766199C6}</Project>
       <Name>PICO.Platform</Name>
     </ProjectReference>
+    <ProjectReference Include="Unity.XR.Interaction.Toolkit.Samples.StarterAssets.csproj">
+      <Project>{988A8699-4A08-A88A-A794-88E5FB74D4DD}</Project>
+      <Name>Unity.XR.Interaction.Toolkit.Samples.StarterAssets</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.XR.Interaction.Toolkit.Samples.StarterAssets.Editor.csproj">
+      <Project>{6CC66E94-4EFF-A2BB-EB8F-9479635E4FF5}</Project>
+      <Name>Unity.XR.Interaction.Toolkit.Samples.StarterAssets.Editor</Name>
+    </ProjectReference>
     <ProjectReference Include="Pico.Spatializer.Example.csproj">
       <Project>{EA05AD66-FC65-8FA8-0621-51BA76CF8B3F}</Project>
       <Name>Pico.Spatializer.Example</Name>
@@ -1233,6 +1243,10 @@
     <ProjectReference Include="Unity.XR.PICO.csproj">
       <Project>{9CF5B4F2-BBD3-3091-497E-E2819C1840D3}</Project>
       <Name>Unity.XR.PICO</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.XR.Interaction.Toolkit.Samples.DeviceSimulator.csproj">
+      <Project>{1B7615DD-ABBF-A2FC-FFB6-FD19FA2BEA10}</Project>
+      <Name>Unity.XR.Interaction.Toolkit.Samples.DeviceSimulator</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

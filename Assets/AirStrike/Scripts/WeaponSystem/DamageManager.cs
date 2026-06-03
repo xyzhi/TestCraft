@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using AirStrikeKit;
 
 namespace HWRWeaponSystem
 {
@@ -18,6 +19,9 @@ namespace HWRWeaponSystem
 
 		public virtual void ApplyDamage (DamagePack damage)
 		{
+			if (IsPlayerInvincibleForTesting ())
+				return;
+
 			if (HP < 0)
 				return;
 
@@ -30,6 +34,9 @@ namespace HWRWeaponSystem
 
 		public virtual void ApplyDamage (int damage)
 		{
+			if (IsPlayerInvincibleForTesting ())
+				return;
+
 			if (HP < 0)
 				return;
 
@@ -54,6 +61,11 @@ namespace HWRWeaponSystem
 				Destroy (this.gameObject);
 			}
 			this.gameObject.SendMessage ("OnDead", SendMessageOptions.DontRequireReceiver);
+		}
+
+		private bool IsPlayerInvincibleForTesting ()
+		{
+			return AirStrikeGame.playerController != null && AirStrikeGame.playerController.gameObject == this.gameObject;
 		}
 
 	}

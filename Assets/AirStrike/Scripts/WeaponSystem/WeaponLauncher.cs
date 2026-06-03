@@ -88,10 +88,24 @@ namespace HWRWeaponSystem
 		public Vector3 AimPoint;
 		[HideInInspector]
 		public GameObject AimObject;
+		public Transform AimOverride;
+		public Camera AimCameraOverride;
 
 		private void rayAiming ()
 		{
 			RaycastHit hit;
+			if (AimOverride != null) {
+				if (Physics.Raycast (AimOverride.position, AimOverride.forward, out hit, MaxAimRange) && SnapCrosshair) {
+					if (Missile != null && hit.collider.tag != Missile.tag) {
+						AimPoint = hit.point;
+						AimObject = hit.collider.gameObject;
+					}
+				} else {
+					AimPoint = AimOverride.position + (AimOverride.forward * MaxAimRange);
+					AimObject = null;
+				}
+				return;
+			}
 			if (OnScreenAiming) {
 				if (CurrentCamera) {
 					var ray = CurrentCamera.ScreenPointToRay (Input.mousePosition);
@@ -129,7 +143,10 @@ namespace HWRWeaponSystem
 
 		private void Update ()
 		{
-			CurrentCamera = Camera.current;
+			CurrentCamera = AimCameraOverride != null ? AimCameraOverride : Camera.main;
+			if (CurrentCamera == null) {
+				CurrentCamera = Camera.current;
+			}
 			if (OnActive) {
 
 

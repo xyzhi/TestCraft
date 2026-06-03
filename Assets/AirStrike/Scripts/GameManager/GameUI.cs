@@ -24,6 +24,23 @@ namespace AirStrikeKit
             weapon = AirStrikeGame.playerController.GetComponent<WeaponController>();
         }
 
+        public void TogglePause()
+        {
+            if (Mode == 1)
+                return;
+
+            if (Mode == 2)
+            {
+                Mode = 0;
+                Time.timeScale = 1;
+            }
+            else
+            {
+                Mode = 2;
+                Time.timeScale = 0;
+            }
+        }
+
         public void OnGUI()
         {
 
@@ -43,6 +60,11 @@ namespace AirStrikeKit
                     {
 
                         AirStrikeGame.playerController.Active = true;
+
+                        if (AirStrikeGame.playerController.IsVRActive && AirStrikeGame.playerController.DisableLegacyHUDInVR)
+                        {
+                            break;
+                        }
 
                         GUI.skin.label.alignment = TextAnchor.UpperLeft;
                         GUI.skin.label.fontSize = 30;
