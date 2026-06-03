@@ -22,6 +22,10 @@ namespace AirStrikeKit
 		// Speed
 		public float SpeedMax = 60.0f;
 		// Max speed
+		public float ReverseSpeed = -30.0f;
+		// Reverse speed
+		public float SpeedInputDeadZone = 0.2f;
+		// Input dead zone for 3-speed mode
 		public float RotationSpeed = 10.0f;
 		// Turn Speed
 		public float SpeedTakeoff = 40;
@@ -37,7 +41,7 @@ namespace AirStrikeKit
 		public bool AutoPilot = false;
 		// if True this plane will follow a target automatically
 		private float MoveSpeed = 0;
-		// normal move speed
+		// current move speed target
 		public float VelocitySpeed = 0;
 
 		[HideInInspector]
@@ -74,6 +78,7 @@ namespace AirStrikeKit
 			mainRot = this.transform.rotation;
 			MoveSpeed = Speed;
 			GetComponent<Rigidbody>().velocity = Vector3.zero;
+			GetComponent<Rigidbody>().useGravity = false;
 		}
 
 		[HideInInspector]
@@ -187,14 +192,19 @@ namespace AirStrikeKit
 
 			if (IsLanding) {
 				roll = Mathf.Lerp (roll, 0, 0.5f);
-				VelocitySpeed = (0 + MoveSpeed);
-				if (speedDelta < 1)
+				VelocitySpeed = MoveSpeed;
+				if (speedMode == 0)
 					MoveSpeed = Mathf.Lerp (MoveSpeed, 0, Time.fixedDeltaTime * 0.2f);
 			
 			} else {
-				VelocitySpeed = (Speed + MoveSpeed);
-				if (speedDelta < 1)
+				if (speedMode > 0) {
+					MoveSpeed = Mathf.Lerp (MoveSpeed, SpeedMax, Time.fixedDeltaTime * AccelerationSpeed);
+				} else if (speedMode < 0) {
+					MoveSpeed = Mathf.Lerp (MoveSpeed, ReverseSpeed, Time.fixedDeltaTime * AccelerationSpeed);
+				} else {
 					MoveSpeed = Mathf.Lerp (MoveSpeed, Speed, Time.fixedDeltaTime * 0.1f);
+				}
+				VelocitySpeed = MoveSpeed;
 			
 			}
 			IsLanding = false;
@@ -229,20 +239,23 @@ namespace AirStrikeKit
 		}
 
 		private float speedDelta;
+		private int speedMode;
 		// Speed up
 		public void SpeedUp (float delta)
 		{
-			if (delta < 0)
-				delta = 0;
-
-			if (delta > 0)
-				MoveSpeed = Mathf.Lerp (MoveSpeed, SpeedMax, Time.deltaTime * AccelerationSpeed);
-
 			speedDelta = delta;
+			if (delta > SpeedInputDeadZone) {
+				speedMode = 1;
+			} else if (delta < -SpeedInputDeadZone) {
+				speedMode = -1;
+			} else {
+				speedMode = 0;
+			}
 		}
 
 		public void SpeedUp ()
 		{
+			speedMode = 1;
 			MoveSpeed = Mathf.Lerp (MoveSpeed, SpeedMax, Time.deltaTime * AccelerationSpeed);
 			speedDelta = 1;
 		}

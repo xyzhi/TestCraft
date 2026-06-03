@@ -5,6 +5,9 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.XR;
 using HWRWeaponSystem;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace AirStrikeKit
 {
@@ -44,12 +47,22 @@ namespace AirStrikeKit
 		public bool VRUseRightControllerAiming = true;
 		public bool DisableLegacyHUDInVR = true;
 
-		private InputDevice leftHandDevice;
-		private InputDevice rightHandDevice;
+		private UnityEngine.XR.InputDevice leftHandDevice;
+		private UnityEngine.XR.InputDevice rightHandDevice;
 		private bool vrSwitchWeaponPressed;
 		private bool vrPausePressed;
 		private bool vrViewPressed;
 		private bool useVrInput;
+		#if ENABLE_INPUT_SYSTEM
+		private InputAction leftPrimary2DAxisAction;
+		private InputAction rightPrimary2DAxisAction;
+		private InputAction rightTriggerAction;
+		private InputAction leftPrimaryButtonAction;
+		private InputAction rightPrimaryButtonAction;
+		private InputAction leftMenuButtonAction;
+		private InputAction rightSecondaryButtonAction;
+		private InputAction leftSecondaryButtonAction;
+		#endif
 
 		public bool IsVRActive {
 			get {
@@ -76,8 +89,14 @@ namespace AirStrikeKit
 			if (!VRAimProvider) {
 				VRAimProvider = CreateOrFindVRAimProvider ();
 			}
+			SetupVRActions ();
 			RefreshVRState ();
 
+		}
+
+		void OnDestroy ()
+		{
+			DisposeVRActions ();
 		}
 
 		void Update ()
@@ -158,41 +177,61 @@ namespace AirStrikeKit
 			flight.FixedZ = false;
 			MouseLock.MouseLocked = false;
 
-			Vector2 leftAxis = ReadAxis2D (leftHandDevice, CommonUsages.primary2DAxis);
-			Vector2 rightAxis = ReadAxis2D (rightHandDevice, CommonUsages.primary2DAxis);
+			Vector2 leftAxis = ReadVRPrimary2DAxis (leftHandDevice, leftPrimary2DAxisAction);
+			Vector2 rightAxis = ReadVRPrimary2DAxis (rightHandDevice, rightPrimary2DAxisAction);
 			leftAxis = ApplyDeadZone (leftAxis);
 			rightAxis = ApplyDeadZone (rightAxis);
 
 			flight.AxisControl (new Vector2 (rightAxis.x, -leftAxis.y) * VRAxisSensitivity);
 			flight.TurnControl (leftAxis.x * VRYawSensitivity);
-			flight.SpeedUp (Mathf.Clamp01 (rightAxis.y));
+			flight.SpeedUp (rightAxis.y);
 
-			float triggerValue = ReadAxis1D (rightHandDevice, CommonUsages.trigger);
+			float triggerValue = ReadVRTrigger (rightHandDevice, rightTriggerAction);
 			bool firePressed = triggerValue >= VRTriggerThreshold;
 			if (firePressed) {
 				flight.WeaponControl.LaunchWeapon ();
 			}
 
-			bool switchPressed = ReadButton (rightHandDevice, CommonUsages.primaryButton) || ReadButton (leftHandDevice, CommonUsages.primaryButton);
+			bool switchPressed = ReadVRButton (rightHandDevice, UnityEngine.XR.CommonUsages.primaryButton, rightPrimaryButtonAction) || ReadVRButton (leftHandDevice, UnityEngine.XR.CommonUsages.primaryButton, leftPrimaryButtonAction);
 			if (switchPressed && !vrSwitchWeaponPressed) {
 				flight.WeaponControl.SwitchWeapon ();
 			}
 			vrSwitchWeaponPressed = switchPressed;
 
-			bool pausePressed = ReadButton (leftHandDevice, CommonUsages.menuButton) || ReadButton (rightHandDevice, CommonUsages.secondaryButton);
+			bool pausePressed = ReadVRButton (leftHandDevice, UnityEngine.XR.CommonUsages.menuButton, leftMenuButtonAction) || ReadVRButton (rightHandDevice, UnityEngine.XR.CommonUsages.secondaryButton, rightSecondaryButtonAction);
 			if (pausePressed && !vrPausePressed && AirStrikeGame.gameUI) {
 				AirStrikeGame.gameUI.TogglePause ();
 			}
 			vrPausePressed = pausePressed;
 
-			bool viewPressed = ReadButton (leftHandDevice, CommonUsages.secondaryButton);
+			bool viewPressed = ReadVRButton (leftHandDevice, UnityEngine.XR.CommonUsages.secondaryButton, leftSecondaryButtonAction);
 			if (viewPressed && !vrViewPressed && View) {
 				View.SwitchCameras ();
 			}
 			vrViewPressed = viewPressed;
 		}
 
-		Vector2 ReadAxis2D (InputDevice device, InputFeatureUsage<Vector2> usage)
+		Vector2 ReadVRPrimary2DAxis (UnityEngine.XR.InputDevice device, InputAction action)
+		{
+			#if ENABLE_INPUT_SYSTEM
+			if (action != null && action.enabled) {
+				return action.ReadValue<Vector2> ();
+			}
+			#endif
+			return ReadAxis2D (device, UnityEngine.XR.CommonUsages.primary2DAxis);
+		}
+
+		float ReadVRTrigger (UnityEngine.XR.InputDevice device, InputAction action)
+		{
+			#if ENABLE_INPUT_SYSTEM
+			if (action != null && action.enabled) {
+				return action.ReadValue<float> ();
+			}
+			#endif
+			return ReadAxis1D (device, UnityEngine.XR.CommonUsages.trigger);
+		}
+
+		Vector2 ReadAxis2D (UnityEngine.XR.InputDevice device, InputFeatureUsage<Vector2> usage)
 		{
 			Vector2 value;
 			if (device.isValid && device.TryGetFeatureValue (usage, out value)) {
@@ -201,7 +240,7 @@ namespace AirStrikeKit
 			return Vector2.zero;
 		}
 
-		float ReadAxis1D (InputDevice device, InputFeatureUsage<float> usage)
+		float ReadAxis1D (UnityEngine.XR.InputDevice device, InputFeatureUsage<float> usage)
 		{
 			float value;
 			if (device.isValid && device.TryGetFeatureValue (usage, out value)) {
@@ -210,7 +249,7 @@ namespace AirStrikeKit
 			return 0;
 		}
 
-		bool ReadButton (InputDevice device, InputFeatureUsage<bool> usage)
+		bool ReadButton (UnityEngine.XR.InputDevice device, InputFeatureUsage<bool> usage)
 		{
 			bool value;
 			if (device.isValid && device.TryGetFeatureValue (usage, out value)) {
@@ -218,6 +257,79 @@ namespace AirStrikeKit
 			}
 			return false;
 		}
+
+		bool ReadVRButton (UnityEngine.XR.InputDevice device, InputFeatureUsage<bool> usage, InputAction action)
+		{
+			#if ENABLE_INPUT_SYSTEM
+			if (action != null && action.enabled) {
+				return action.IsPressed ();
+			}
+			#endif
+			return ReadButton (device, usage);
+		}
+
+		void SetupVRActions ()
+		{
+			#if ENABLE_INPUT_SYSTEM
+			if (leftPrimary2DAxisAction != null)
+				return;
+
+			leftPrimary2DAxisAction = CreateVRValueAction ("Left Primary 2D Axis", "<XRController>{LeftHand}/primary2DAxis");
+			rightPrimary2DAxisAction = CreateVRValueAction ("Right Primary 2D Axis", "<XRController>{RightHand}/primary2DAxis");
+			rightTriggerAction = CreateVRValueAction ("Right Trigger", "<XRController>{RightHand}/trigger");
+			leftPrimaryButtonAction = CreateVRButtonAction ("Left Primary Button", "<XRController>{LeftHand}/primaryButton");
+			rightPrimaryButtonAction = CreateVRButtonAction ("Right Primary Button", "<XRController>{RightHand}/primaryButton");
+			leftMenuButtonAction = CreateVRButtonAction ("Left Menu Button", "<XRController>{LeftHand}/menuButton");
+			rightSecondaryButtonAction = CreateVRButtonAction ("Right Secondary Button", "<XRController>{RightHand}/secondaryButton");
+			leftSecondaryButtonAction = CreateVRButtonAction ("Left Secondary Button", "<XRController>{LeftHand}/secondaryButton");
+			#endif
+		}
+
+		void DisposeVRActions ()
+		{
+			#if ENABLE_INPUT_SYSTEM
+			DisposeAction (leftPrimary2DAxisAction);
+			DisposeAction (rightPrimary2DAxisAction);
+			DisposeAction (rightTriggerAction);
+			DisposeAction (leftPrimaryButtonAction);
+			DisposeAction (rightPrimaryButtonAction);
+			DisposeAction (leftMenuButtonAction);
+			DisposeAction (rightSecondaryButtonAction);
+			DisposeAction (leftSecondaryButtonAction);
+			leftPrimary2DAxisAction = null;
+			rightPrimary2DAxisAction = null;
+			rightTriggerAction = null;
+			leftPrimaryButtonAction = null;
+			rightPrimaryButtonAction = null;
+			leftMenuButtonAction = null;
+			rightSecondaryButtonAction = null;
+			leftSecondaryButtonAction = null;
+			#endif
+		}
+
+		#if ENABLE_INPUT_SYSTEM
+		InputAction CreateVRValueAction (string actionName, string bindingPath)
+		{
+			InputAction action = new InputAction (actionName, InputActionType.Value, bindingPath);
+			action.Enable ();
+			return action;
+		}
+
+		InputAction CreateVRButtonAction (string actionName, string bindingPath)
+		{
+			InputAction action = new InputAction (actionName, InputActionType.Button, bindingPath);
+			action.Enable ();
+			return action;
+		}
+
+		void DisposeAction (InputAction action)
+		{
+			if (action == null)
+				return;
+			action.Disable ();
+			action.Dispose ();
+		}
+		#endif
 
 		Vector2 ApplyDeadZone (Vector2 axis)
 		{
@@ -332,7 +444,7 @@ namespace AirStrikeKit
 			}
 
 			if (useVrInput) {
-				GUI.Label (new Rect (20, 390, 500, 40), "VR Left Stick : Yaw/Pitch  Right Stick : Roll/Throttle  Trigger : Fire");
+				GUI.Label (new Rect (20, 390, 500, 40), "VR Left Stick : Yaw/Pitch  Right Stick : Roll/3-Speed  Trigger : Fire");
 			}
 		
 			if (GUI.Button (new Rect (20, 250, 200, 40), "Change Weapons")) {
