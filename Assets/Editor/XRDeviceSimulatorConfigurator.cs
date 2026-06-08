@@ -35,14 +35,14 @@ public static class XRDeviceSimulatorConfigurator
 		}
 
 		bool changed = false;
-		if (!autoInstantiate.boolValue) {
-			autoInstantiate.boolValue = true;
-			changed = true;
-		}
-		if (!editorOnly.boolValue) {
-			editorOnly.boolValue = true;
-			changed = true;
-		}
+		//if (!autoInstantiate.boolValue) {
+		//	autoInstantiate.boolValue = true;
+		//	changed = true;
+		//}
+		//if (!editorOnly.boolValue) {
+		//	editorOnly.boolValue = true;
+		//	changed = true;
+		//}
 		if (simulator.objectReferenceValue != simulatorPrefab) {
 			simulator.objectReferenceValue = simulatorPrefab;
 			changed = true;

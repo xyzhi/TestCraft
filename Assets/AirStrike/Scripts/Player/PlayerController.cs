@@ -37,8 +37,6 @@ namespace AirStrikeKit
 		public GUISkin skin;
 		public bool ShowHowto;
 		[Header ("VR")]
-		public bool EnableVRController = true;
-		public bool AutoDetectXR = true;
 		public VRAimProvider VRAimProvider;
 		public float VRAxisSensitivity = 1.2f;
 		public float VRYawSensitivity = 1.2f;
@@ -122,7 +120,7 @@ namespace AirStrikeKit
 		void RefreshVRState ()
 		{
 			bool xrDetected = XRSettings.isDeviceActive;
-			useVrInput = EnableVRController && (!AutoDetectXR || xrDetected);
+			useVrInput = xrDetected || IsEditorSimulatorActive ();
 			if (!useVrInput)
 				return;
 
@@ -144,6 +142,15 @@ namespace AirStrikeKit
 				VRAimProvider.RefreshReferences ();
 			}
 			ApplyVRAimingTargets ();
+		}
+
+		bool IsEditorSimulatorActive ()
+		{
+			#if UNITY_EDITOR
+			return GameObject.Find ("XR Device Simulator") != null;
+			#else
+			return false;
+			#endif
 		}
 
 		void ApplyVRAimingTargets ()

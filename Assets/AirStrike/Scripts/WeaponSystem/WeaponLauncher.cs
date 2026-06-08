@@ -37,6 +37,14 @@ namespace HWRWeaponSystem
 		public float DistanceLock = 200;
 		public float TimeToLock = 2;
 
+		[Header ("VR HUD")]
+		public bool ShowVRWorldCrosshair = true;
+		public float VRCrosshairFallbackDistance = 20f;
+		public float VRCrosshairSurfaceOffset = 0.05f;
+		public float VRCrosshairScalePerMeter = 0.01f;
+		public float VRMinCrosshairScale = 0.02f;
+		public float VRMaxCrosshairScale = 0.12f;
+
 		[Header ("Other FX")]
 		public GameObject Shell;
 		public float ShellLifeTime = 4;
@@ -63,6 +71,8 @@ namespace HWRWeaponSystem
 		public float ReloadingProcess;
 		public GameObject CrosshairObject;
 		private GameObject crosshair;
+		private GameObject vrCrosshair;
+		private Material vrCrosshairMaterial;
 		public Texture2D Icon;
 
 		private void Start ()
@@ -230,6 +240,8 @@ namespace HWRWeaponSystem
 					}
 				}
 			}
+
+			UpdateVRWorldCrosshair ();
 		}
 
 		public Camera CurrentCamera;
@@ -288,6 +300,112 @@ namespace HWRWeaponSystem
 			}
 		}
 
+		private void UpdateVRWorldCrosshair ()
+		{
+			bool shouldShow = ShouldShowVRWorldCrosshair ();
+			if (!shouldShow) {
+				SetVRWorldCrosshairActive (false);
+				return;
+			}
+
+			EnsureVRWorldCrosshair ();
+			if (vrCrosshair == null || CurrentCamera == null) {
+				return;
+			}
+
+			Vector3 cameraPosition = CurrentCamera.transform.position;
+			Vector3 targetPosition = AimPoint;
+			Vector3 direction = targetPosition - cameraPosition;
+			float distance = direction.magnitude;
+			if (distance <= 0.01f) {
+				direction = CurrentCamera.transform.forward;
+				distance = VRCrosshairFallbackDistance;
+				targetPosition = cameraPosition + (direction * distance);
+			} else {
+				direction /= distance;
+				targetPosition += direction * VRCrosshairSurfaceOffset;
+			}
+
+			vrCrosshair.transform.position = targetPosition;
+			vrCrosshair.transform.forward = (cameraPosition - targetPosition).normalized;
+
+			float scale = Mathf.Clamp (distance * VRCrosshairScalePerMeter, VRMinCrosshairScale, VRMaxCrosshairScale);
+			vrCrosshair.transform.localScale = new Vector3 (scale, scale, scale);
+
+			if (crosshair != null) {
+				crosshair.transform.position = targetPosition;
+				crosshair.transform.forward = (cameraPosition - targetPosition).normalized;
+			}
+
+			SetVRWorldCrosshairActive (true);
+		}
+
+		private bool ShouldShowVRWorldCrosshair ()
+		{
+			if (!ShowVRWorldCrosshair || !OnActive || CurrentCamera == null) {
+				return false;
+			}
+
+			if (CrosshairTexture == null && crosshair == null && CrosshairObject == null) {
+				return false;
+			}
+
+			AirStrikeKit.PlayerController playerController = AirStrikeKit.AirStrikeGame.playerController;
+			if (playerController == null) {
+				return false;
+			}
+
+			return playerController.IsVRActive && playerController.DisableLegacyHUDInVR;
+		}
+
+		private void EnsureVRWorldCrosshair ()
+		{
+			if (vrCrosshair != null || CrosshairTexture == null) {
+				return;
+			}
+
+			Shader shader = Shader.Find ("Unlit/Transparent");
+			if (shader == null) {
+				shader = Shader.Find ("Sprites/Default");
+			}
+			if (shader == null) {
+				return;
+			}
+
+			vrCrosshair = GameObject.CreatePrimitive (PrimitiveType.Quad);
+			vrCrosshair.name = this.name + "_VRWorldCrosshair";
+			vrCrosshair.transform.SetParent (null, false);
+			vrCrosshair.layer = LayerMask.NameToLayer ("Ignore Raycast");
+
+			Collider quadCollider = vrCrosshair.GetComponent<Collider> ();
+			if (quadCollider != null) {
+				Destroy (quadCollider);
+			}
+
+			vrCrosshairMaterial = new Material (shader);
+			vrCrosshairMaterial.mainTexture = CrosshairTexture;
+			vrCrosshairMaterial.color = Color.white;
+
+			Renderer renderer = vrCrosshair.GetComponent<Renderer> ();
+			if (renderer != null) {
+				renderer.sharedMaterial = vrCrosshairMaterial;
+				renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+				renderer.receiveShadows = false;
+			}
+
+			vrCrosshair.SetActive (false);
+		}
+
+		private void SetVRWorldCrosshairActive (bool active)
+		{
+			if (vrCrosshair != null && vrCrosshair.activeSelf != active) {
+				vrCrosshair.SetActive (active);
+			}
+			if (crosshair != null && crosshair.activeSelf != active) {
+				crosshair.SetActive (active);
+			}
+		}
+
 		private void OnGUI ()
 		{
 			if (OnActive) {
@@ -326,6 +444,16 @@ namespace HWRWeaponSystem
 		{
 			timetolockcount = Time.time;
 			target = null;
+		}
+
+		private void OnDestroy ()
+		{
+			if (vrCrosshairMaterial != null) {
+				Destroy (vrCrosshairMaterial);
+			}
+			if (vrCrosshair != null) {
+				Destroy (vrCrosshair);
+			}
 		}
 
 		private int currentOuter = 0;
