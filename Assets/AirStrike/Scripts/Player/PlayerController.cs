@@ -15,63 +15,88 @@ namespace AirStrikeKit
 
 	public class PlayerController : MonoBehaviour
 	{
-	
+		// 飞行核心组件，负责姿态、速度和武器调用。
 		FlightSystem flight;
-		// Core plane system
+		// 镜头切换组件，桌面版和调试界面会用到。
 		FlightView View;
+		// 玩家控制器总开关，关闭后不再处理输入。
 		public bool Active = true;
+		// 桌面/移动端的简化操控模式。
 		public bool SimpleControl;
-		// make it easy to control Plane will turning easier.
-		public bool Acceleration;
-		// Mobile*** enabled gyroscope controller
+		// 移动端触屏控制灵敏度。
 		public float AccelerationSensitivity = 5;
-		// Mobile*** gyroscope sensitivity
+		// 移动端左半屏虚拟摇杆区域。
 		private TouchScreenVal controllerTouch;
-		// Mobile*** move
+		// 移动端开火触控区域。
 		private TouchScreenVal fireTouch;
-		// Mobile*** fire
+		// 移动端切武器触控区域。
 		private TouchScreenVal switchTouch;
-		// Mobile*** swich
+		// 移动端油门滑动区域。
 		private TouchScreenVal sliceTouch;
-		// Mobile*** slice
+		// 调试界面使用的皮肤。
 		public GUISkin skin;
+		// 是否显示调试/教学按钮。
 		public bool ShowHowto;
 		[Header ("VR")]
+		// VR 瞄准源提供者，负责头显/控制器射线方向。
 		public VRAimProvider VRAimProvider;
+		// VR 摇杆控制飞行姿态的灵敏度。
 		public float VRAxisSensitivity = 1.2f;
+		// VR 偏航控制灵敏度。
 		public float VRYawSensitivity = 1.2f;
+		// VR 右扳机判定为“开火”的阈值。
 		public float VRTriggerThreshold = 0.6f;
+		// VR 摇杆死区，避免控制器轻微漂移。
 		public float VRJoystickDeadZone = 0.2f;
+		// 是否使用右手控制器作为瞄准方向。
 		public bool VRUseRightControllerAiming = true;
+		// VR 模式下是否关闭旧版屏幕 HUD/准星。
 		public bool DisableLegacyHUDInVR = true;
 
+		// 左手 XR 设备句柄。
 		private UnityEngine.XR.InputDevice leftHandDevice;
+		// 右手 XR 设备句柄。
 		private UnityEngine.XR.InputDevice rightHandDevice;
+		// 记录上一帧是否按下切武器，避免长按连触发。
 		private bool vrSwitchWeaponPressed;
+		// 记录上一帧是否按下暂停键。
 		private bool vrPausePressed;
+		// 记录上一帧是否按下切视角键。
 		private bool vrViewPressed;
+		// 当前是否正在使用 VR 输入逻辑。
 		private bool useVrInput;
 		#if ENABLE_INPUT_SYSTEM
+		// 左手主摇杆输入 action。
 		private InputAction leftPrimary2DAxisAction;
+		// 右手主摇杆输入 action。
 		private InputAction rightPrimary2DAxisAction;
+		// 右手扳机输入 action。
 		private InputAction rightTriggerAction;
+		// 左手主按钮输入 action。
 		private InputAction leftPrimaryButtonAction;
+		// 右手主按钮输入 action。
 		private InputAction rightPrimaryButtonAction;
+		// 左手菜单按钮输入 action。
 		private InputAction leftMenuButtonAction;
+		// 右手副按钮输入 action。
 		private InputAction rightSecondaryButtonAction;
+		// 左手副按钮输入 action。
 		private InputAction leftSecondaryButtonAction;
 		#endif
 
+		// 对外暴露当前是否处于 VR 控制模式。
 		public bool IsVRActive {
 			get {
 				return useVrInput;
 			}
 		}
 
+		// 初始化全局玩家引用，方便其他系统访问当前玩家控制器。
 		void Awake(){
 			AirStrikeGame.playerController = this;
 		}
 
+		// 缓存核心组件并初始化移动端/VR 输入引用。
 		void Start ()
 		{
 			flight = this.GetComponent<FlightSystem> ();
@@ -92,11 +117,13 @@ namespace AirStrikeKit
 
 		}
 
+		// 退出时释放 Input System 动态创建的 VR actions。
 		void OnDestroy ()
 		{
 			DisposeVRActions ();
 		}
 
+		// 每帧根据当前运行环境切换到 VR、桌面或移动端输入。
 		void Update ()
 		{
 			if (!flight || !Active)
@@ -117,6 +144,7 @@ namespace AirStrikeKit
 		
 		}
 
+		// 刷新 VR 状态，并在进入 VR 模式时补齐控制器与瞄准引用。
 		void RefreshVRState ()
 		{
 			bool xrDetected = XRSettings.isDeviceActive;
@@ -144,6 +172,7 @@ namespace AirStrikeKit
 			ApplyVRAimingTargets ();
 		}
 
+		// 编辑器下通过场景里是否存在 XR Device Simulator 判断是否启用模拟 VR。
 		bool IsEditorSimulatorActive ()
 		{
 			#if UNITY_EDITOR
@@ -153,6 +182,7 @@ namespace AirStrikeKit
 			#endif
 		}
 
+		// 把所有武器的瞄准来源改为当前 VR 头显/控制器方向。
 		void ApplyVRAimingTargets ()
 		{
 			if (!flight || flight.WeaponControl == null || VRAimProvider == null)
@@ -176,6 +206,7 @@ namespace AirStrikeKit
 			}
 		}
 
+		// VR 输入主循环，负责飞行、开火、切武器、暂停和切镜头。
 		void VRController ()
 		{
 			flight.SimpleControl = false;
@@ -218,6 +249,7 @@ namespace AirStrikeKit
 			vrViewPressed = viewPressed;
 		}
 
+		// 读取 VR 摇杆输入，优先走 Input System，拿不到再回退到 XR CommonUsages。
 		Vector2 ReadVRPrimary2DAxis (UnityEngine.XR.InputDevice device, InputAction action)
 		{
 			#if ENABLE_INPUT_SYSTEM
@@ -228,6 +260,7 @@ namespace AirStrikeKit
 			return ReadAxis2D (device, UnityEngine.XR.CommonUsages.primary2DAxis);
 		}
 
+		// 读取 VR 扳机值，优先走 Input System，拿不到再回退到 XR CommonUsages。
 		float ReadVRTrigger (UnityEngine.XR.InputDevice device, InputAction action)
 		{
 			#if ENABLE_INPUT_SYSTEM
@@ -238,6 +271,7 @@ namespace AirStrikeKit
 			return ReadAxis1D (device, UnityEngine.XR.CommonUsages.trigger);
 		}
 
+		// 从 XR 设备读取二维轴输入。
 		Vector2 ReadAxis2D (UnityEngine.XR.InputDevice device, InputFeatureUsage<Vector2> usage)
 		{
 			Vector2 value;
@@ -247,6 +281,7 @@ namespace AirStrikeKit
 			return Vector2.zero;
 		}
 
+		// 从 XR 设备读取单轴输入。
 		float ReadAxis1D (UnityEngine.XR.InputDevice device, InputFeatureUsage<float> usage)
 		{
 			float value;
@@ -256,6 +291,7 @@ namespace AirStrikeKit
 			return 0;
 		}
 
+		// 从 XR 设备读取布尔按钮输入。
 		bool ReadButton (UnityEngine.XR.InputDevice device, InputFeatureUsage<bool> usage)
 		{
 			bool value;
@@ -265,6 +301,7 @@ namespace AirStrikeKit
 			return false;
 		}
 
+		// 读取 VR 按钮，优先走 Input System，拿不到再回退到 XR CommonUsages。
 		bool ReadVRButton (UnityEngine.XR.InputDevice device, InputFeatureUsage<bool> usage, InputAction action)
 		{
 			#if ENABLE_INPUT_SYSTEM
@@ -275,6 +312,7 @@ namespace AirStrikeKit
 			return ReadButton (device, usage);
 		}
 
+		// 创建并启用 VR 所需的 Input System actions。
 		void SetupVRActions ()
 		{
 			#if ENABLE_INPUT_SYSTEM
@@ -292,6 +330,7 @@ namespace AirStrikeKit
 			#endif
 		}
 
+		// 释放动态创建的 VR Input System actions。
 		void DisposeVRActions ()
 		{
 			#if ENABLE_INPUT_SYSTEM
@@ -315,6 +354,7 @@ namespace AirStrikeKit
 		}
 
 		#if ENABLE_INPUT_SYSTEM
+		// 创建一个 Value 类型的 VR 输入 action。
 		InputAction CreateVRValueAction (string actionName, string bindingPath)
 		{
 			InputAction action = new InputAction (actionName, InputActionType.Value, bindingPath);
@@ -322,6 +362,7 @@ namespace AirStrikeKit
 			return action;
 		}
 
+		// 创建一个 Button 类型的 VR 输入 action。
 		InputAction CreateVRButtonAction (string actionName, string bindingPath)
 		{
 			InputAction action = new InputAction (actionName, InputActionType.Button, bindingPath);
@@ -329,6 +370,7 @@ namespace AirStrikeKit
 			return action;
 		}
 
+		// 安全释放单个 Input System action。
 		void DisposeAction (InputAction action)
 		{
 			if (action == null)
@@ -338,6 +380,7 @@ namespace AirStrikeKit
 		}
 		#endif
 
+		// 对摇杆输入应用死区并重新映射有效范围。
 		Vector2 ApplyDeadZone (Vector2 axis)
 		{
 			if (axis.magnitude < VRJoystickDeadZone)
@@ -346,6 +389,7 @@ namespace AirStrikeKit
 			return axis.normalized * normalizedMagnitude;
 		}
 
+		// 优先从主相机或当前对象上创建/获取 VRAimProvider。
 		VRAimProvider CreateOrFindVRAimProvider ()
 		{
 			Camera mainCamera = Camera.main;
@@ -361,6 +405,7 @@ namespace AirStrikeKit
 			return provider;
 		}
 
+		// 桌面版输入：鼠标控制姿态，键盘控制偏航和油门。
 		void DesktopController ()
 		{
 			// Desktop controller
@@ -393,32 +438,20 @@ namespace AirStrikeKit
 			}	
 		}
 
+		// 移动端输入：仅保留触屏虚拟摇杆控制。
 		void MobileController ()
 		{
 			// Mobile controller
 		
 			flight.SimpleControl = SimpleControl;
-		
-			if (Acceleration) {
-				// get axis control from device acceleration
-				Vector3 acceleration = Input.acceleration;
-				Vector2 accValActive = new Vector2 (acceleration.x, (acceleration.y + 0.3f) * 0.5f) * AccelerationSensitivity;
-				flight.FixedX = false;
-				flight.FixedY = false;
-				flight.FixedZ = true;
-			
-				flight.AxisControl (accValActive);
-				flight.TurnControl (accValActive.x);
-			} else {
-				flight.FixedX = true;
-				flight.FixedY = false;
-				flight.FixedZ = true;
-				// get axis control from touch screen
-				Vector2 dir = controllerTouch.OnDragDirection (true);
-				dir = Vector2.ClampMagnitude (dir, 1.0f);
-				flight.AxisControl (new Vector2 (dir.x, -dir.y) * AccelerationSensitivity * 0.7f);
-				flight.TurnControl (dir.x * AccelerationSensitivity * 0.3f);
-			}
+			flight.FixedX = true;
+			flight.FixedY = false;
+			flight.FixedZ = true;
+			// get axis control from touch screen
+			Vector2 dir = controllerTouch.OnDragDirection (true);
+			dir = Vector2.ClampMagnitude (dir, 1.0f);
+			flight.AxisControl (new Vector2 (dir.x, -dir.y) * AccelerationSensitivity * 0.7f);
+			flight.TurnControl (dir.x * AccelerationSensitivity * 0.3f);
 			sliceTouch.OnDragDirection (true);
 			// slice speed
 			flight.SpeedUp (sliceTouch.slideVal.x);
@@ -432,7 +465,7 @@ namespace AirStrikeKit
 		}
 	
 	
-		// you can remove this part..
+		// 调试 UI，可按需删除。
 		void OnGUI ()
 		{
 			if (!ShowHowto)
@@ -441,11 +474,7 @@ namespace AirStrikeKit
 			if (skin)
 				GUI.skin = skin;
 		
-			if (GUI.Button (new Rect (20, 150, 200, 40), "Gyroscope " + Acceleration)) {
-				Acceleration = !Acceleration;
-			}
-		
-			if (GUI.Button (new Rect (20, 200, 200, 40), "Change View")) {
+			if (GUI.Button (new Rect (20, 150, 200, 40), "Change View")) {
 				if (View)
 					View.SwitchCameras ();	
 			}
@@ -454,17 +483,17 @@ namespace AirStrikeKit
 				GUI.Label (new Rect (20, 390, 500, 40), "VR Left Stick : Yaw/Pitch  Right Stick : Roll/3-Speed  Trigger : Fire");
 			}
 		
-			if (GUI.Button (new Rect (20, 250, 200, 40), "Change Weapons")) {
+			if (GUI.Button (new Rect (20, 200, 200, 40), "Change Weapons")) {
 				if (flight)
 					flight.WeaponControl.SwitchWeapon ();
 			}
 		
-			if (GUI.Button (new Rect (20, 300, 200, 40), "Simple Control " + SimpleControl)) {
+			if (GUI.Button (new Rect (20, 250, 200, 40), "Simple Control " + SimpleControl)) {
 				if (flight)
 					SimpleControl = !SimpleControl;
 			}
 
-			GUI.Label (new Rect (20, 350, 500, 40), "you can remove this in OnGUI in PlayerController.cs");
+			GUI.Label (new Rect (20, 300, 500, 40), "you can remove this in OnGUI in PlayerController.cs");
 		}
 	}
 }

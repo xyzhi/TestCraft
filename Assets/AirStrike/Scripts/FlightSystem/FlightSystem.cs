@@ -28,8 +28,6 @@ namespace AirStrikeKit
 		// Input dead zone for 3-speed mode
 		public float RotationSpeed = 10.0f;
 		// Turn Speed
-		public float SpeedTakeoff = 40;
-		// Min speed to take off
 		public float SpeedPitch = 2;
 		// rotation X
 		public float SpeedRoll = 3;
@@ -68,8 +66,6 @@ namespace AirStrikeKit
 		public bool FixedX;
 		public bool FixedY;
 		public bool FixedZ;
-		public bool IsLanding;
-		private float gravityVelocity = 0;
 
 		void Start ()
 		{
@@ -80,9 +76,6 @@ namespace AirStrikeKit
 			GetComponent<Rigidbody>().velocity = Vector3.zero;
 			GetComponent<Rigidbody>().useGravity = false;
 		}
-
-		[HideInInspector]
-		public float normalFlySpeed;
 
 		float SignedAngleBetween (Vector3 a, Vector3 b, Vector3 n)
 		{
@@ -107,8 +100,6 @@ namespace AirStrikeKit
 
 			Quaternion AddRot = Quaternion.identity;
 			Vector3 velocityTarget = Vector3.zero;
-			normalFlySpeed = Mathf.Clamp (VelocitySpeed / (SpeedTakeoff * 2), 0, 1);
-
 			if (AutoPilot) {// if auto pilot
 				if (FollowTarget) {
 					// rotation facing to the positionTarget
@@ -140,11 +131,7 @@ namespace AirStrikeKit
 				velocityTarget = (GetComponent<Rigidbody>().rotation * Vector3.forward) * VelocitySpeed;
 			} else {
 				// axis control by input
-				if (!IsLanding) {
-					AddRot.eulerAngles = new Vector3 (pitch + ((1 - normalFlySpeed) * 0.5f), yaw, -roll);
-				} else {
-					AddRot.eulerAngles = new Vector3 (pitch, yaw, -roll);
-				}
+				AddRot.eulerAngles = new Vector3 (pitch, yaw, -roll);
 
 				mainRot *= AddRot;
 
@@ -168,53 +155,18 @@ namespace AirStrikeKit
 				GetComponent<Rigidbody>().rotation = Quaternion.Lerp (GetComponent<Rigidbody>().rotation, mainRot, Time.fixedDeltaTime * RotationSpeed);
 			}
 
-			if (IsLanding) {
-				Quaternion saveQ = mainRot;
-				Vector3 fixedAngles = new Vector3 (mainRot.eulerAngles.x, mainRot.eulerAngles.y, mainRot.eulerAngles.z);
-				fixedAngles.x = 1;
-				fixedAngles.z = 1;
-				gravityVelocity = 0;	
-				saveQ.eulerAngles = fixedAngles;
-				mainRot = Quaternion.Lerp (mainRot, saveQ, Time.fixedDeltaTime * 2);
-			} else {
-				if (GetComponent<Rigidbody>().useGravity) {
-					gravityVelocity += (Physics.gravity.y * ((1 - Mathf.Clamp (VelocitySpeed / (SpeedTakeoff * 2), 0, 1)) + Vector3.Dot (Physics.gravity.normalized, velocityTarget.normalized + (Vector3.up * 0.5f)))) * Time.fixedDeltaTime;
-					gravityVelocity = Mathf.Clamp (gravityVelocity, -float.MaxValue, 0);
-					velocityTarget.y += gravityVelocity;
-				}
-			}
-
-
 			yaw = Mathf.Lerp (yaw, 0, Time.deltaTime);
 			Vector3 velocityChange = (velocityTarget - GetComponent<Rigidbody>().velocity);
 			GetComponent<Rigidbody>().AddForce (velocityChange, ForceMode.VelocityChange);
 
-
-			if (IsLanding) {
-				roll = Mathf.Lerp (roll, 0, 0.5f);
-				VelocitySpeed = MoveSpeed;
-				if (speedMode == 0)
-					MoveSpeed = Mathf.Lerp (MoveSpeed, 0, Time.fixedDeltaTime * 0.2f);
-			
+			if (speedMode > 0) {
+				MoveSpeed = Mathf.Lerp (MoveSpeed, SpeedMax, Time.fixedDeltaTime * AccelerationSpeed);
+			} else if (speedMode < 0) {
+				MoveSpeed = Mathf.Lerp (MoveSpeed, ReverseSpeed, Time.fixedDeltaTime * AccelerationSpeed);
 			} else {
-				if (speedMode > 0) {
-					MoveSpeed = Mathf.Lerp (MoveSpeed, SpeedMax, Time.fixedDeltaTime * AccelerationSpeed);
-				} else if (speedMode < 0) {
-					MoveSpeed = Mathf.Lerp (MoveSpeed, ReverseSpeed, Time.fixedDeltaTime * AccelerationSpeed);
-				} else {
-					MoveSpeed = Mathf.Lerp (MoveSpeed, Speed, Time.fixedDeltaTime * 0.1f);
-				}
-				VelocitySpeed = MoveSpeed;
-			
+				MoveSpeed = Mathf.Lerp (MoveSpeed, Speed, Time.fixedDeltaTime * 0.1f);
 			}
-			IsLanding = false;
-		}
-
-
-
-		public void Landing ()
-		{
-			IsLanding = true;
+			VelocitySpeed = MoveSpeed;
 		}
 
 		// Input function. ( roll and pitch)
@@ -223,13 +175,8 @@ namespace AirStrikeKit
 			if (SimpleControl) {
 				LimitAxisControl.y = LimitAxisControl.x;	
 			}
-			if (!IsLanding) {
-				roll = Mathf.Lerp (roll, Mathf.Clamp (axis.x, -LimitAxisControl.x, LimitAxisControl.x) * SpeedRoll, Time.deltaTime);
-			}
-			if (VelocitySpeed > SpeedTakeoff || !IsLanding) {
-				float pitchVel = Mathf.Clamp (VelocitySpeed / (SpeedTakeoff * 2), 0, 1);
-				pitch = Mathf.Lerp (pitch, Mathf.Clamp (axis.y, -LimitAxisControl.y, LimitAxisControl.y) * SpeedPitch, Time.deltaTime * pitchVel);
-			}
+			roll = Mathf.Lerp (roll, Mathf.Clamp (axis.x, -LimitAxisControl.x, LimitAxisControl.x) * SpeedRoll, Time.deltaTime);
+			pitch = Mathf.Lerp (pitch, Mathf.Clamp (axis.y, -LimitAxisControl.y, LimitAxisControl.y) * SpeedPitch, Time.deltaTime);
 		}
 
 		// Input function ( yaw)
