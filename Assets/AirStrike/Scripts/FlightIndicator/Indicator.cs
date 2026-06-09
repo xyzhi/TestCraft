@@ -86,6 +86,10 @@ namespace AirStrikeKit
 
 		void OnGUI ()
 		{
+			if (AirStrikeGame.playerController != null && AirStrikeGame.playerController.IsVRActive) {
+				return;
+			}
+
 			if (Show) {
 				GUI.color = new Color (1, 1, 1, Alpha);
 				switch (Mode) {

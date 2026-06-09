@@ -45,8 +45,8 @@ namespace AirStrikeKit
 		public BattleCenter CenterOfBattle;
 		//  middle of battle area object (optional)
 		public float FlyDistance = 1000;
-		// limited distance between (BattlePosition and AI position) , this is will create a circle battle area and AI cannot go far out of this area.
 	
+		// limited distance between (BattlePosition and AI position) , this is will create a circle battle area and AI cannot go far out of this area.
 	
 		public AIState AIstate = AIState.Patrol;
 		// AI state

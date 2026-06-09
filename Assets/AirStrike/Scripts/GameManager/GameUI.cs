@@ -61,7 +61,7 @@ namespace AirStrikeKit
 
                         AirStrikeGame.playerController.Active = true;
 
-                        if (AirStrikeGame.playerController.IsVRActive && AirStrikeGame.playerController.DisableLegacyHUDInVR)
+                        if (AirStrikeGame.playerController.IsVRActive)
                         {
                             break;
                         }

@@ -63,17 +63,17 @@ namespace HWRWeaponSystem
 
 		[Header ("VR HUD")]
 		// VR 模式下是否显示世界空间准星。
-		public bool ShowVRWorldCrosshair = true;
+		bool ShowVRWorldCrosshair = true;
 		// 当没有命中点时，VR 准星默认放置距离。
-		public float VRCrosshairFallbackDistance = 20f;
+		float VRCrosshairFallbackDistance = 2f;
 		// VR 准星贴在表面时额外前推的偏移量，避免闪烁穿插。
-		public float VRCrosshairSurfaceOffset = 0.05f;
+		float VRCrosshairSurfaceOffset = 0.05f;
 		// VR 准星随距离缩放的系数。
-		public float VRCrosshairScalePerMeter = 0.01f;
+		float VRCrosshairScalePerMeter = 0.2f;
 		// VR 准星最小缩放。
-		public float VRMinCrosshairScale = 0.02f;
+		float VRMinCrosshairScale = 0.05f;
 		// VR 准星最大缩放。
-		public float VRMaxCrosshairScale = 0.12f;
+		float VRMaxCrosshairScale = 0.5f;
 
 		[Header ("Other FX")]
 		// 弹壳预制体。
@@ -151,9 +151,12 @@ namespace HWRWeaponSystem
 		[HideInInspector]
 		// 当前瞄准命中的世界坐标。
 		public Vector3 AimPoint;
-		[HideInInspector]
+		//[HideInInspector]
 		// 当前瞄准命中的物体。
 		public GameObject AimObject;
+		[HideInInspector]
+		// 当前瞄准点是否来自真实命中，用于 VR 准星决定贴表面还是贴相机前方。
+		public bool HasValidAimPoint;
 		// 可选的外部瞄准源，VR 模式下一般由头显或手柄提供。
 		public Transform AimOverride;
 		// 可选的外部瞄准相机，用于替代主相机进行屏幕射线。
@@ -168,10 +171,12 @@ namespace HWRWeaponSystem
 					if (Missile != null && hit.collider.tag != Missile.tag) {
 						AimPoint = hit.point;
 						AimObject = hit.collider.gameObject;
+						HasValidAimPoint = true;
 					}
 				} else {
 					AimPoint = AimOverride.position + (AimOverride.forward * MaxAimRange);
 					AimObject = null;
+					HasValidAimPoint = false;
 				}
 				return;
 			}
@@ -182,10 +187,12 @@ namespace HWRWeaponSystem
 						if (Missile != null && hit.collider.tag != Missile.tag) {
 							AimPoint = hit.point;
 							AimObject = hit.collider.gameObject;
+							HasValidAimPoint = true;
 						}
 					} else {
 						AimPoint = ray.origin + (ray.direction * MaxAimRange);
 						AimObject = null;
+						HasValidAimPoint = false;
 					}
 				}
 			} else {
@@ -194,10 +201,12 @@ namespace HWRWeaponSystem
 					if (Missile != null && hit.collider.tag != Missile.tag) {
 						AimPoint = hit.point;
 						AimObject = hit.collider.gameObject;
+						HasValidAimPoint = true;
 					}
 				} else {
 					AimPoint = this.transform.position + (this.transform.forward * MaxAimRange);
 					AimObject = null;
+					HasValidAimPoint = false;
 				}
 			}
 
@@ -332,7 +341,7 @@ namespace HWRWeaponSystem
 			}
 
 			PlayerController playerController = AirStrikeGame.playerController;
-			if (playerController != null && playerController.IsVRActive) {
+			if (playerController != null && playerController.IsVRActive && ShowCrosshair) {
 				UpdateVRWorldCrosshair ();
 			}
 		}
@@ -414,7 +423,7 @@ namespace HWRWeaponSystem
 			Vector3 targetPosition = AimPoint;
 			Vector3 direction = targetPosition - cameraPosition;
 			float distance = direction.magnitude;
-			if (distance <= 0.01f) {
+			if (!HasValidAimPoint || distance <= 0.01f) {
 				direction = CurrentCamera.transform.forward;
 				distance = VRCrosshairFallbackDistance;
 				targetPosition = cameraPosition + (direction * distance);
@@ -424,14 +433,14 @@ namespace HWRWeaponSystem
 			}
 
 			vrCrosshair.transform.position = targetPosition;
-			vrCrosshair.transform.forward = (cameraPosition - targetPosition).normalized;
+			vrCrosshair.transform.forward = (targetPosition - cameraPosition).normalized;
 
 			float scale = Mathf.Clamp (distance * VRCrosshairScalePerMeter, VRMinCrosshairScale, VRMaxCrosshairScale);
 			vrCrosshair.transform.localScale = new Vector3 (scale, scale, scale);
 
 			if (crosshair != null) {
 				crosshair.transform.position = targetPosition;
-				crosshair.transform.forward = (cameraPosition - targetPosition).normalized;
+				crosshair.transform.forward = (targetPosition - cameraPosition).normalized;
 			}
 
 			SetVRWorldCrosshairActive (true);
@@ -448,12 +457,7 @@ namespace HWRWeaponSystem
 				return false;
 			}
 
-			AirStrikeKit.PlayerController playerController = AirStrikeKit.AirStrikeGame.playerController;
-			if (playerController == null) {
-				return false;
-			}
-
-			return playerController.IsVRActive && playerController.DisableLegacyHUDInVR;
+			return true;
 		}
 
 		// 按需创建 VR 世界空间准星对象。
@@ -509,6 +513,11 @@ namespace HWRWeaponSystem
 		// 负责传统 OnGUI HUD 的绘制，包括锁框和准星。
 		private void OnGUI ()
 		{
+			PlayerController playerController = AirStrikeGame.playerController;
+			if (playerController != null && playerController.IsVRActive) {
+				return;
+			}
+
 			if (OnActive) {
 				if (Seeker) {
 

@@ -50,8 +50,6 @@ namespace AirStrikeKit
 		public float VRJoystickDeadZone = 0.2f;
 		// 是否使用右手控制器作为瞄准方向。
 		public bool VRUseRightControllerAiming = true;
-		// VR 模式下是否关闭旧版屏幕 HUD/准星。
-		public bool DisableLegacyHUDInVR = true;
 
 		// 左手 XR 设备句柄。
 		private UnityEngine.XR.InputDevice leftHandDevice;
@@ -200,10 +198,6 @@ namespace AirStrikeKit
 					continue;
 				launchers [i].AimOverride = aimTransform;
 				launchers [i].AimCameraOverride = aimCamera;
-				if (DisableLegacyHUDInVR) {
-					launchers [i].ShowHUD = false;
-					launchers [i].ShowCrosshair = false;
-				}
 			}
 		}
 
