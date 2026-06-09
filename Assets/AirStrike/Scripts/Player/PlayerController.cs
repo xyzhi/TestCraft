@@ -106,15 +106,11 @@ namespace AirStrikeKit
 			fireTouch = new TouchScreenVal (new Rect (Screen.width / 2, 0, Screen.width / 2, Screen.height));
 			switchTouch = new TouchScreenVal (new Rect (0, Screen.height - 100, Screen.width / 2, 100));
 			sliceTouch = new TouchScreenVal (new Rect (0, 0, Screen.width / 2, 50));
-			if (!VRAimProvider) {
-				VRAimProvider = GameObject.FindObjectOfType<VRAimProvider> ();
+			useVrInput = XRSettings.isDeviceActive || IsEditorSimulatorActive ();
+			if (useVrInput) {
+				SetupVRActions ();
+				RefreshVRState ();
 			}
-			if (!VRAimProvider) {
-				VRAimProvider = CreateOrFindVRAimProvider ();
-			}
-			SetupVRActions ();
-			RefreshVRState ();
-
 		}
 
 		// 退出时释放 Input System 动态创建的 VR actions。
@@ -129,26 +125,28 @@ namespace AirStrikeKit
 			if (!flight || !Active)
 				return;
 
-			RefreshVRState ();
-			if (useVrInput) {
-				VRController ();
+			//VR模式
+			if (useVrInput)
+			{
+				RefreshVRState ();
+				VRController();
 				return;
 			}
-			#if UNITY_EDITOR || UNITY_WEBPLAYER || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-			// On Desktop
-			DesktopController ();
-			#else
+			else
+			{
+#if UNITY_EDITOR || UNITY_WEBPLAYER || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
+				// On Desktop
+				DesktopController();
+#else
 			// On Mobile device
 			MobileController ();
-			#endif
-		
+#endif
+			}
 		}
 
 		// 刷新 VR 状态，并在进入 VR 模式时补齐控制器与瞄准引用。
 		void RefreshVRState ()
 		{
-			bool xrDetected = XRSettings.isDeviceActive;
-			useVrInput = xrDetected || IsEditorSimulatorActive ();
 			if (!useVrInput)
 				return;
 
@@ -185,6 +183,9 @@ namespace AirStrikeKit
 		// 把所有武器的瞄准来源改为当前 VR 头显/控制器方向。
 		void ApplyVRAimingTargets ()
 		{
+			if (!useVrInput)
+				return;
+
 			if (!flight || flight.WeaponControl == null || VRAimProvider == null)
 				return;
 
@@ -209,6 +210,9 @@ namespace AirStrikeKit
 		// VR 输入主循环，负责飞行、开火、切武器、暂停和切镜头。
 		void VRController ()
 		{
+			if (!useVrInput)
+				return;
+
 			flight.SimpleControl = false;
 			flight.FixedX = false;
 			flight.FixedY = false;

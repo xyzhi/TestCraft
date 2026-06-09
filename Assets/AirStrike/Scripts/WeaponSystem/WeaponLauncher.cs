@@ -331,9 +331,10 @@ namespace HWRWeaponSystem
 				}
 			}
 
-
-			if (AirStrikeKit.AirStrikeGame.playerController.IsVRActive)
-				UpdateVRWorldCrosshair();
+			PlayerController playerController = AirStrikeGame.playerController;
+			if (playerController != null && playerController.IsVRActive) {
+				UpdateVRWorldCrosshair ();
+			}
 		}
 
 		// 当前用于 HUD 与屏幕瞄准的相机引用。
