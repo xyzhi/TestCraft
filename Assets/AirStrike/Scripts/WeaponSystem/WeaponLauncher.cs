@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections;
 using Random = UnityEngine.Random;
+using AirStrikeKit;
 
 namespace HWRWeaponSystem
 {
@@ -211,50 +212,68 @@ namespace HWRWeaponSystem
 		}
 
 		// 处理锁敌、装填、相机引用和 VR 准星刷新。
-		private void Update ()
+		private void Update()
 		{
 			CurrentCamera = AimCameraOverride != null ? AimCameraOverride : Camera.main;
-			if (CurrentCamera == null) {
+			if (CurrentCamera == null)
+			{
 				CurrentCamera = Camera.current;
 			}
-			if (OnActive) {
+			if (OnActive)
+			{
 
 
-				if (TorqueObject) {
-					TorqueObject.transform.Rotate (torqueTemp * Time.deltaTime);
-					torqueTemp = Vector3.Lerp (torqueTemp, Vector3.zero, Time.deltaTime);
+				if (TorqueObject)
+				{
+					TorqueObject.transform.Rotate(torqueTemp * Time.deltaTime);
+					torqueTemp = Vector3.Lerp(torqueTemp, Vector3.zero, Time.deltaTime);
 				}
-				if (Seeker) {
+				if (Seeker)
+				{
 
-					for (int t = 0; t < TargetTag.Length; t++) {
-						TargetCollector collector = WeaponSystem.Finder.FindTargetTag (TargetTag [t]);
+					for (int t = 0; t < TargetTag.Length; t++)
+					{
+						TargetCollector collector = WeaponSystem.Finder.FindTargetTag(TargetTag[t]);
 
-						if (collector != null) {
+						if (collector != null)
+						{
 							GameObject[] objs = collector.Targets;
 							float distance = int.MaxValue;
-				
-							if (AimObject != null && AimObject.tag == TargetTag [t]) {
-								float dis = Vector3.Distance (AimObject.transform.position, transform.position);
-								if (DistanceLock > dis) {
-									if (distance > dis) {
-										if (timetolockcount + TimeToLock < Time.time) {	
+
+							if (AimObject != null && AimObject.tag == TargetTag[t])
+							{
+								float dis = Vector3.Distance(AimObject.transform.position, transform.position);
+								if (DistanceLock > dis)
+								{
+									if (distance > dis)
+									{
+										if (timetolockcount + TimeToLock < Time.time)
+										{
 											distance = dis;
 											target = AimObject;
 										}
 									}
-								}	
-							} else {
-								for (int i = 0; i < objs.Length; i++) {
-									if (objs [i]) {
-										Vector3 dir = (objs [i].transform.position - transform.position).normalized;
-										float direction = Vector3.Dot (dir, transform.forward);
-										float dis = Vector3.Distance (objs [i].transform.position, transform.position);
-										if (direction >= AimDirection) {
-											if (DistanceLock > dis) {
-												if (distance > dis) {
-													if (timetolockcount + TimeToLock < Time.time) {	
+								}
+							}
+							else
+							{
+								for (int i = 0; i < objs.Length; i++)
+								{
+									if (objs[i])
+									{
+										Vector3 dir = (objs[i].transform.position - transform.position).normalized;
+										float direction = Vector3.Dot(dir, transform.forward);
+										float dis = Vector3.Distance(objs[i].transform.position, transform.position);
+										if (direction >= AimDirection)
+										{
+											if (DistanceLock > dis)
+											{
+												if (distance > dis)
+												{
+													if (timetolockcount + TimeToLock < Time.time)
+													{
 														distance = dis;
-														target = objs [i];
+														target = objs[i];
 													}
 												}
 											}
@@ -265,43 +284,56 @@ namespace HWRWeaponSystem
 						}
 					}
 				}
-				if (target) {
-					float targetdistance = Vector3.Distance (transform.position, target.transform.position);
+				if (target)
+				{
+					float targetdistance = Vector3.Distance(transform.position, target.transform.position);
 					Vector3 dir = (target.transform.position - transform.position).normalized;
-					float direction = Vector3.Dot (dir, transform.forward);
+					float direction = Vector3.Dot(dir, transform.forward);
 
-					if (targetdistance > DistanceLock || direction <= AimDirection) {
-						Unlock ();
+					if (targetdistance > DistanceLock || direction <= AimDirection)
+					{
+						Unlock();
 					}
 				}
 
-				if (Reloading) {
+				if (Reloading)
+				{
 					ReloadingProcess = ((1 / ReloadTime) * (reloadTimeTemp + ReloadTime - Time.time));
-					if (Time.time >= reloadTimeTemp + ReloadTime) {
+					if (Time.time >= reloadTimeTemp + ReloadTime)
+					{
 						Reloading = false;
-						if (SoundReloaded) {
-							if (audioSource) {
-								audioSource.PlayOneShot (SoundReloaded);
+						if (SoundReloaded)
+						{
+							if (audioSource)
+							{
+								audioSource.PlayOneShot(SoundReloaded);
 							}
 						}
 						Ammo = AmmoMax;
 					}
-				} else {
-					if (Ammo <= 0) {
-						Unlock ();
+				}
+				else
+				{
+					if (Ammo <= 0)
+					{
+						Unlock();
 						Reloading = true;
 						reloadTimeTemp = Time.time;
 
-						if (SoundReloading) {
-							if (audioSource) {
-								audioSource.PlayOneShot (SoundReloading);
+						if (SoundReloading)
+						{
+							if (audioSource)
+							{
+								audioSource.PlayOneShot(SoundReloading);
 							}
 						}
 					}
 				}
 			}
 
-			UpdateVRWorldCrosshair ();
+
+			if (AirStrikeKit.AirStrikeGame.playerController.IsVRActive)
+				UpdateVRWorldCrosshair();
 		}
 
 		// 当前用于 HUD 与屏幕瞄准的相机引用。
