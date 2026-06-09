@@ -105,6 +105,7 @@ namespace HWRWeaponSystem
 		private float nextFireTime = 0;
 		// 当前已经锁定的目标。
 		private GameObject target;
+		private WeaponController weaponController;
 		// 开火后作用在武器模型上的后坐旋转缓存。
 		private Vector3 torqueTemp;
 		// 本轮装填开始的时间。
@@ -133,6 +134,8 @@ namespace HWRWeaponSystem
 		{
 			if (!Owner)
 				Owner = this.transform.root.gameObject;
+
+			weaponController = GetComponentInParent<WeaponController> ();
 
 			if (!audioSource) {
 				audioSource = this.GetComponent<AudioSource> ();
@@ -179,8 +182,7 @@ namespace HWRWeaponSystem
 					HasValidAimPoint = false;
 				}
 				return;
-			}
-			if (OnScreenAiming) {
+			}else if (OnScreenAiming) {
 				if (CurrentCamera) {
 					var ray = CurrentCamera.ScreenPointToRay (Input.mousePosition);
 					if (Physics.Raycast (ray, out hit, MaxAimRange) && SnapCrosshair) {
@@ -223,6 +225,7 @@ namespace HWRWeaponSystem
 		// 处理锁敌、装填、相机引用和 VR 准星刷新。
 		private void Update()
 		{
+			SyncLockedTargetReference ();
 			CurrentCamera = AimCameraOverride != null ? AimCameraOverride : Camera.main;
 			if (CurrentCamera == null)
 			{
@@ -259,7 +262,7 @@ namespace HWRWeaponSystem
 										if (timetolockcount + TimeToLock < Time.time)
 										{
 											distance = dis;
-											target = AimObject;
+											SetLockedTarget (AimObject);
 										}
 									}
 								}
@@ -282,7 +285,7 @@ namespace HWRWeaponSystem
 													if (timetolockcount + TimeToLock < Time.time)
 													{
 														distance = dis;
-														target = objs[i];
+														SetLockedTarget (objs[i]);
 													}
 												}
 											}
@@ -293,18 +296,6 @@ namespace HWRWeaponSystem
 						}
 					}
 				}
-				if (target)
-				{
-					float targetdistance = Vector3.Distance(transform.position, target.transform.position);
-					Vector3 dir = (target.transform.position - transform.position).normalized;
-					float direction = Vector3.Dot(dir, transform.forward);
-
-					if (targetdistance > DistanceLock || direction <= AimDirection)
-					{
-						Unlock();
-					}
-				}
-
 				if (Reloading)
 				{
 					ReloadingProcess = ((1 / ReloadTime) * (reloadTimeTemp + ReloadTime - Time.time));
@@ -325,7 +316,6 @@ namespace HWRWeaponSystem
 				{
 					if (Ammo <= 0)
 					{
-						Unlock();
 						Reloading = true;
 						reloadTimeTemp = Time.time;
 
@@ -519,11 +509,11 @@ namespace HWRWeaponSystem
 			}
 
 			if (OnActive) {
-				if (Seeker) {
+				if (target) {
+					DrawTargetLockon (target.transform, true);
+				}
 
-					if (target) {
-						DrawTargetLockon (target.transform, true);
-					}
+				if (Seeker) {
 
 					for (int t = 0; t < TargetTag.Length; t++) {
 						TargetCollector collector = WeaponSystem.Finder.FindTargetTag (TargetTag [t]);
@@ -554,7 +544,33 @@ namespace HWRWeaponSystem
 		private void Unlock ()
 		{
 			timetolockcount = Time.time;
-			target = null;
+			SetLockedTarget (null);
+		}
+
+		private void SetLockedTarget (GameObject lockedTarget)
+		{
+			target = lockedTarget;
+			if (weaponController != null) {
+				if (lockedTarget == null) {
+					weaponController.ClearLockedTarget ();
+				} else {
+					weaponController.SetLockedTarget (lockedTarget);
+				}
+			}
+		}
+
+		private void SyncLockedTargetReference ()
+		{
+			if (weaponController == null) {
+				weaponController = GetComponentInParent<WeaponController> ();
+			}
+
+			if (weaponController != null) {
+				if (weaponController.LockedTarget == null) {
+					weaponController.ClearLockedTarget ();
+				}
+				target = weaponController.LockedTarget;
+			}
 		}
 
 		// 销毁运行时生成的 VR 材质和准星对象，避免泄漏。

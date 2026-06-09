@@ -40,6 +40,9 @@ namespace AirStrikeKit
 		// target lock distance
 		public float DistanceAttack = 300;
 		// attack distance
+		//冻结ai
+		bool FreezeMovementForDebug = false;
+		// stop AI movement and clear rigidbody velocity for aiming tests
 		public Vector3 BattlePosition;
 		// middle of battle area position
 		public BattleCenter CenterOfBattle;
@@ -65,12 +68,17 @@ namespace AirStrikeKit
 		private TargetBehavior targetHavior;
 		// current target behavior
 		private Vector3 targetpositionTemp;
+		private Rigidbody cachedRigidbody;
 
 		void Start ()
 		{
 			timetolockcount = Time.time;
 			flight = this.GetComponent<FlightSystem> ();// get Flight System
-			flight.AutoPilot = true;// set auto pilot to true will make this plane flying and looking to Target automatically
+			cachedRigidbody = GetComponent<Rigidbody> ();
+			flight.AutoPilot = !FreezeMovementForDebug;// set auto pilot to true will make this plane flying and looking to Target automatically
+			if (FreezeMovementForDebug) {
+				StopMovementForDebug ();
+			}
 			timestatetemp = 0;
 			if (!CenterOfBattle) {
 				BattleCenter btcenter = (BattleCenter)GameObject.FindObjectOfType (typeof(BattleCenter));
@@ -115,6 +123,11 @@ namespace AirStrikeKit
 		{
 			if (!flight)
 				return;
+
+			if (FreezeMovementForDebug) {
+				StopMovementForDebug ();
+				return;
+			}
 		
 
 			if (CenterOfBattle) 
@@ -355,6 +368,17 @@ namespace AirStrikeKit
 			// cancel a target.
 			Target = null;
 			AIstate = AIState.Idle;	
+		}
+
+		void StopMovementForDebug ()
+		{
+			flight.AutoPilot = false;
+			flight.FollowTarget = false;
+			flight.PositionTarget = transform.position;
+			if (cachedRigidbody) {
+				cachedRigidbody.velocity = Vector3.zero;
+				cachedRigidbody.angularVelocity = Vector3.zero;
+			}
 		}
 
 	}

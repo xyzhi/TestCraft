@@ -11,6 +11,7 @@ namespace HWRWeaponSystem
 		public WeaponLauncher[] WeaponLists;
 		// 当前激活武器在 WeaponLists 中的索引。
 		public int CurrentWeapon = 0;
+		public GameObject LockedTarget;
 		// 是否让武器显示准星。
 		public bool ShowCrosshair;
 		// 切换武器时是否隐藏未使用武器模型。
@@ -37,6 +38,18 @@ namespace HWRWeaponSystem
 				return WeaponLists [CurrentWeapon];
 			}
 			return null;
+		}
+
+		public void SetLockedTarget (GameObject target)
+		{
+			LockedTarget = target;
+		}
+
+		public void ClearLockedTarget (GameObject target = null)
+		{
+			if (target == null || LockedTarget == target) {
+				LockedTarget = null;
+			}
 		}
 
 		// 初始化所有武器的目标标签和准星显示状态。
