@@ -627,13 +627,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6403aa39a77df7048b230e3dac154f81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetTag: []
-  NavTexture: []
-  Crosshair: {fileID: 0}
-  Crosshair_in: {fileID: 0}
-  CrosshairOffset: {x: 0, y: 0}
-  CrosshairOffset_in: {x: 0, y: 0}
-  DistanceSee: 800
   Alpha: 0.7
   CockpitCamera: []
   PrimaryCameraIndex: 0
@@ -6261,13 +6254,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 1
   ReloadTime: 1
-  ShowHUD: 1
-  ShowCrosshair: 1
-  CrosshairTexture: {fileID: 2800000, guid: 0f1f7ce1d16679442abddbea63f991a9, type: 3}
-  TargetLockOnTexture: {fileID: 2800000, guid: bc4ee973b9e81854a881e05b13b18d5c, type: 3}
-  TargetLockedTexture: {fileID: 2800000, guid: 0bf4fc32f7d0d0a4f9b18e59362a60b1, type: 3}
   DistanceLock: 500
   TimeToLock: 2
+  ShowCrosshair: 1
+  CrosshairTexture: {fileID: 2800000, guid: 0f1f7ce1d16679442abddbea63f991a9, type: 3}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -6281,7 +6272,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -7117,7 +7107,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 461554, guid: eb579e2a6420b0c45ab97245bc8b2322, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 653.3
+      value: -375
       objectReference: {fileID: 0}
     - target: {fileID: 461554, guid: eb579e2a6420b0c45ab97245bc8b2322, type: 3}
       propertyPath: m_LocalPosition.y

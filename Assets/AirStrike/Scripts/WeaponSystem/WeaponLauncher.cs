@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using System.Collections;
 using Random = UnityEngine.Random;
 using AirStrikeKit;
 
@@ -61,22 +60,6 @@ namespace HWRWeaponSystem
 		// 换弹耗时。
 		public float ReloadTime = 1;
 
-		[Header ("HUD")]
-		// 是否显示传统 HUD。
-		// 是否显示传统 HUD。
-		public bool ShowHUD = true;
-		// 是否显示准星。
-		// 是否显示准星。
-		public bool ShowCrosshair = true;
-		// 普通准星贴图。
-		// 普通准星贴图。
-		public Texture2D CrosshairTexture;
-		// 锁定中提示贴图。
-		// 锁定中的提示贴图。
-		public Texture2D TargetLockOnTexture;
-		// 已锁定提示贴图。
-		// 已完成锁定的提示贴图。
-		public Texture2D TargetLockedTexture;
 		// 最大锁定距离。
 		// 可锁定目标的最大距离。
 		public float DistanceLock = 200;
@@ -84,15 +67,21 @@ namespace HWRWeaponSystem
 		// 从开始跟踪到完成锁定所需的时间。
 		public float TimeToLock = 2;
 
-		[Header ("VR HUD")]
+		[Header ("Crosshair")]
+		// 是否显示当前武器的准星。
+		public bool ShowCrosshair = true;
+		// 普通屏幕准星和 VR 世界准星共用的贴图。
+		public Texture2D CrosshairTexture;
+		// 可选的准星对象预制体。
+		public GameObject CrosshairObject;
 		// VR 模式下是否显示世界空间准星。
 		bool ShowVRWorldCrosshair = true;
-		// 当没有命中点时，VR 准星默认放置距离。
+		// 当没有真实命中点时，VR 准星默认放在相机前方的距离。
 		float VRCrosshairFallbackDistance = 2f;
-		// VR 准星贴在表面时额外前推的偏移量，避免闪烁穿插。
+		// VR 准星贴到命中面时向相机方向前推，避免和表面闪烁。
 		float VRCrosshairSurfaceOffset = 0.05f;
 		// VR 准星随距离缩放的系数。
-		float VRCrosshairScalePerMeter = 0.2f;
+		float VRCrosshairScalePerMeter = 0.07f;
 		// VR 准星最小缩放。
 		float VRMinCrosshairScale = 0.05f;
 		// VR 准星最大缩放。
@@ -145,6 +134,9 @@ namespace HWRWeaponSystem
 		private float reloadTimeTemp;
 		// 发射器使用的音频组件。
 		private AudioSource audioSource;
+		private GameObject crosshair;
+		private GameObject vrCrosshair;
+		private Material vrCrosshairMaterial;
 		[HideInInspector]
 		// 当前是否正在装填。
 		// 当前是否正处于换弹中。
@@ -153,15 +145,6 @@ namespace HWRWeaponSystem
 		// 当前装填进度，供外部 UI 读取。
 		// 当前换弹进度，供外部 UI 读取。
 		public float ReloadingProcess;
-		// 可选的准星对象预制体。
-		// 可选的准星对象预制体。
-		public GameObject CrosshairObject;
-		// 运行时实例化出的传统准星对象。
-		private GameObject crosshair;
-		// VR 世界空间准星对象。
-		private GameObject vrCrosshair;
-		// VR 准星使用的运行时材质。
-		private Material vrCrosshairMaterial;
 		// 武器在 UI 中显示的图标。
 		// 武器在 UI 中显示的图标。
 		public Texture2D Icon;
@@ -181,8 +164,7 @@ namespace HWRWeaponSystem
 				}
 			}
 			if (CrosshairObject) {
-				crosshair = (GameObject)GameObject.Instantiate (CrosshairObject.gameObject, this.transform.position, CrosshairObject.transform.rotation);	
-
+				crosshair = (GameObject)GameObject.Instantiate (CrosshairObject.gameObject, this.transform.position, CrosshairObject.transform.rotation);
 			}
 			if (WeaponSystem.Finder == null)
 				Debug.LogWarning ("Need Weapon System object in the scene, you have to place it from WeaponSystem/WeaponSystem.prefab");
@@ -372,63 +354,22 @@ namespace HWRWeaponSystem
 		// 当前武器使用的瞄准相机。
 		public Camera CurrentCamera;
 
-		// 绘制目标锁定框与目标距离信息。
-		private void DrawTargetLockon (Transform aimtarget, bool locked)
-		{
-			if (!ShowHUD)
-				return;
-
-			if (CurrentCamera) {
-
-
-				if (crosshair) {
-					crosshair.transform.position = AimPoint;
-					crosshair.transform.forward = this.transform.forward;
-					//Quaternion lookat = Quaternion.LookRotation((crosshair.transform.position - CurrentCamera.transform.position).normalized);
-				}
-
-				Vector3 dir = (aimtarget.position - CurrentCamera.transform.position).normalized;
-				float direction = Vector3.Dot (dir, CurrentCamera.transform.forward);
-				if (direction > 0.5f) {
-					Vector3 screenPos = CurrentCamera.WorldToScreenPoint (aimtarget.transform.position);
-					float distance = Vector3.Distance (transform.position, aimtarget.transform.position);
-					if (locked) {
-						if (TargetLockedTexture)
-							GUI.DrawTexture (new Rect (screenPos.x - TargetLockedTexture.width / 2, Screen.height - screenPos.y - TargetLockedTexture.height / 2, TargetLockedTexture.width, TargetLockedTexture.height), TargetLockedTexture);
-						GUI.Label (new Rect (screenPos.x + 40, Screen.height - screenPos.y, 200, 30), aimtarget.name + " " + Mathf.Floor (distance) + "m.");
-					} else {
-						if (TargetLockOnTexture)
-							GUI.DrawTexture (new Rect (screenPos.x - TargetLockOnTexture.width / 2, Screen.height - screenPos.y - TargetLockOnTexture.height / 2, TargetLockOnTexture.width, TargetLockOnTexture.height), TargetLockOnTexture);
-					}
-
-
-				}
-			} else {
-				//Debug.Log("Can't Find camera");
-			}
-		}
-
 		private Vector3 crosshairPos;
 
-		// 绘制普通屏幕准星，并做简单平滑过渡。
 		private void DrawCrosshair ()
 		{
 			if (!ShowCrosshair)
 				return;
 
 			if (CurrentCamera) {
-
 				Vector3 screenPosAim = CurrentCamera.WorldToScreenPoint (AimPoint);
-
 				crosshairPos += ((screenPosAim - crosshairPos) / 5);
 				if (CrosshairTexture) {
 					GUI.DrawTexture (new Rect (crosshairPos.x - CrosshairTexture.width / 2, Screen.height - crosshairPos.y - CrosshairTexture.height / 2, CrosshairTexture.width, CrosshairTexture.height), CrosshairTexture);
-
 				}
 			}
 		}
 
-		// 更新 VR 世界空间准星的位置、朝向和缩放。
 		private void UpdateVRWorldCrosshair ()
 		{
 			bool shouldShow = ShouldShowVRWorldCrosshair ();
@@ -469,7 +410,6 @@ namespace HWRWeaponSystem
 			SetVRWorldCrosshairActive (true);
 		}
 
-		// 判断当前是否应该显示 VR 世界空间准星。
 		private bool ShouldShowVRWorldCrosshair ()
 		{
 			if (!ShowVRWorldCrosshair || !OnActive || CurrentCamera == null) {
@@ -483,7 +423,6 @@ namespace HWRWeaponSystem
 			return true;
 		}
 
-		// 按需创建 VR 世界空间准星对象。
 		private void EnsureVRWorldCrosshair ()
 		{
 			if (vrCrosshair != null || CrosshairTexture == null) {
@@ -522,7 +461,6 @@ namespace HWRWeaponSystem
 			vrCrosshair.SetActive (false);
 		}
 
-		// 统一切换传统准星和 VR 准星的显示状态。
 		private void SetVRWorldCrosshairActive (bool active)
 		{
 			if (vrCrosshair != null && vrCrosshair.activeSelf != active) {
@@ -533,7 +471,6 @@ namespace HWRWeaponSystem
 			}
 		}
 
-		// 负责传统 OnGUI HUD 的绘制，包括锁框和准星。
 		private void OnGUI ()
 		{
 			PlayerController playerController = AirStrikeGame.playerController;
@@ -542,38 +479,8 @@ namespace HWRWeaponSystem
 			}
 
 			if (OnActive) {
-				bool useWorldTargetIndicator = AirStrikeGame.gameUI != null && AirStrikeGame.gameUI.TargetIndicatorPrefab != null;
-				if (!useWorldTargetIndicator) {
-					if (target) {
-						DrawTargetLockon (target.transform, true);
-					}
-
-					if (Seeker) {
-
-						for (int t = 0; t < TargetTag.Length; t++) {
-							TargetCollector collector = WeaponSystem.Finder.FindTargetTag (TargetTag [t]);
-							if (collector != null) {
-								GameObject[] objs = collector.Targets;
-								for (int i = 0; i < objs.Length; i++) {
-									if (objs [i]) {
-										Vector3 dir = (objs [i].transform.position - transform.position).normalized;
-										float direction = Vector3.Dot (dir, transform.forward);
-										if (direction >= AimDirection) {
-											float dis = Vector3.Distance (objs [i].transform.position, transform.position);
-											if (DistanceLock > dis) {
-												DrawTargetLockon (objs [i].transform, false);
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
 				DrawCrosshair ();
-
 			}
-
 		}
 
 		// 清空当前锁定目标，并重置锁定计时。
@@ -603,17 +510,6 @@ namespace HWRWeaponSystem
 
 			if (weaponController != null) {
 				target = weaponController.LockedTarget;
-			}
-		}
-
-		// 销毁运行时生成的 VR 材质和准星对象，避免泄漏。
-		private void OnDestroy ()
-		{
-			if (vrCrosshairMaterial != null) {
-				Destroy (vrCrosshairMaterial);
-			}
-			if (vrCrosshair != null) {
-				Destroy (vrCrosshair);
 			}
 		}
 
@@ -731,6 +627,16 @@ namespace HWRWeaponSystem
 		}
 
 		// 在 Scene 视图中绘制武器朝向辅助线。
+		private void OnDestroy ()
+		{
+			if (vrCrosshairMaterial != null) {
+				Destroy (vrCrosshairMaterial);
+			}
+			if (vrCrosshair != null) {
+				Destroy (vrCrosshair);
+			}
+		}
+
 		void OnDrawGizmos ()
 		{
 

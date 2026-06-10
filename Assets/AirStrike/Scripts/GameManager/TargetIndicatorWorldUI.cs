@@ -7,8 +7,8 @@ namespace AirStrikeKit
     public class TargetIndicatorWorldUI : MonoBehaviour
     {
         public float DistanceScale = 0.001f;
-        public float MinScale = 0.7f;
-        public float MaxScale = 1.4f;
+        public float MinScale = 0.1f;
+        public float MaxScale = 4f;
         float PullTowardCameraScale = 1f;
 
         private Canvas rootCanvas;
