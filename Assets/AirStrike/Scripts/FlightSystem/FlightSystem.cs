@@ -32,6 +32,8 @@ namespace AirStrikeKit
 		// rotation X
 		public float SpeedRoll = 3;
 		// rotation Z
+		// 左右输入改为太空侧向平移时使用的侧推速度。
+		public float StrafeSpeed = 40.0f;
 		public float SpeedYaw = 1;
 		// rotation Y
 		public float DampingTarget = 10.0f;
@@ -57,6 +59,9 @@ namespace AirStrikeKit
 		private Quaternion mainRot = Quaternion.identity;
 		[HideInInspector]
 		public float roll = 0;
+		[HideInInspector]
+		// 当前左右侧向平移速度，由 PC 鼠标 X 或 VR 右摇杆 X 驱动。
+		public float strafe = 0;
 		[HideInInspector]
 		public float pitch = 0;
 		[HideInInspector]
@@ -151,7 +156,7 @@ namespace AirStrikeKit
 					mainRot = Quaternion.Lerp (mainRot, saveQ, Time.fixedDeltaTime * 2);
 				}
 
-				velocityTarget = (GetComponent<Rigidbody>().rotation * Vector3.forward) * VelocitySpeed;
+				velocityTarget = ((GetComponent<Rigidbody>().rotation * Vector3.forward) * VelocitySpeed) + ((GetComponent<Rigidbody>().rotation * Vector3.right) * strafe);
 				GetComponent<Rigidbody>().rotation = Quaternion.Lerp (GetComponent<Rigidbody>().rotation, mainRot, Time.fixedDeltaTime * RotationSpeed);
 			}
 
@@ -169,13 +174,14 @@ namespace AirStrikeKit
 			VelocitySpeed = MoveSpeed;
 		}
 
-		// Input function. ( roll and pitch)
+		// Input function. ( horizontal strafe and pitch)
 		public void AxisControl (Vector2 axis)
 		{
 			if (SimpleControl) {
 				LimitAxisControl.y = LimitAxisControl.x;	
 			}
-			roll = Mathf.Lerp (roll, Mathf.Clamp (axis.x, -LimitAxisControl.x, LimitAxisControl.x) * SpeedRoll, Time.deltaTime);
+			roll = Mathf.Lerp (roll, 0, Time.deltaTime);
+			strafe = Mathf.Lerp (strafe, Mathf.Clamp (axis.x, -LimitAxisControl.x, LimitAxisControl.x) * StrafeSpeed, Time.deltaTime);
 			pitch = Mathf.Lerp (pitch, Mathf.Clamp (axis.y, -LimitAxisControl.y, LimitAxisControl.y) * SpeedPitch, Time.deltaTime);
 		}
 

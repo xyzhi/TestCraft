@@ -236,13 +236,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 0
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -256,7 +254,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -617,13 +614,11 @@ MonoBehaviour:
   AmmoMax: 3
   InfinityAmmo: 1
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -637,7 +632,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -887,7 +881,7 @@ PrefabInstance:
     - target: {fileID: 8112921285308865003, guid: 4ab2fc4928ff37746b26b549008cd60d,
         type: 3}
       propertyPath: m_Name
-      value: Example2_Grey (1)
+      value: Example2_Grey
       objectReference: {fileID: 0}
     - target: {fileID: 8112921285308865003, guid: 4ab2fc4928ff37746b26b549008cd60d,
         type: 3}
@@ -1150,13 +1144,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6403aa39a77df7048b230e3dac154f81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetTag: []
-  NavTexture: []
-  Crosshair: {fileID: 0}
-  Crosshair_in: {fileID: 0}
-  CrosshairOffset: {x: 0, y: 0}
-  CrosshairOffset_in: {x: 0, y: 0}
-  DistanceSee: 800
   Alpha: 0.7
   CockpitCamera: []
   PrimaryCameraIndex: 0
@@ -1223,6 +1210,7 @@ MonoBehaviour:
   RotationSpeed: 50
   SpeedPitch: 2
   SpeedRoll: 3
+  StrafeSpeed: 100
   SpeedYaw: 1
   DampingTarget: 10
   AutoPilot: 0
@@ -1232,6 +1220,7 @@ MonoBehaviour:
   PositionTarget: {x: 0, y: 0, z: 0}
   WeaponControl: {fileID: 0}
   roll: 0
+  strafe: 0
   pitch: 0
   yaw: 0
   LimitAxisControl: {x: 2, y: 1}
@@ -1747,13 +1736,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 0
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -1767,7 +1754,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -2034,13 +2020,11 @@ MonoBehaviour:
   AmmoMax: 3
   InfinityAmmo: 1
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -2054,7 +2038,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -3207,13 +3190,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6403aa39a77df7048b230e3dac154f81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetTag: []
-  NavTexture: []
-  Crosshair: {fileID: 0}
-  Crosshair_in: {fileID: 0}
-  CrosshairOffset: {x: 0, y: 0}
-  CrosshairOffset_in: {x: 0, y: 0}
-  DistanceSee: 800
   Alpha: 0.7
   CockpitCamera: []
   PrimaryCameraIndex: 0
@@ -3280,6 +3256,7 @@ MonoBehaviour:
   RotationSpeed: 50
   SpeedPitch: 2
   SpeedRoll: 3
+  StrafeSpeed: 20
   SpeedYaw: 1
   DampingTarget: 10
   AutoPilot: 0
@@ -3289,6 +3266,7 @@ MonoBehaviour:
   PositionTarget: {x: 0, y: 0, z: 0}
   WeaponControl: {fileID: 0}
   roll: 0
+  strafe: 0
   pitch: 0
   yaw: 0
   LimitAxisControl: {x: 2, y: 1}
@@ -8980,13 +8958,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 0
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -9000,7 +8976,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -9629,13 +9604,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 0
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -9649,7 +9622,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -9916,13 +9888,11 @@ MonoBehaviour:
   AmmoMax: 3
   InfinityAmmo: 1
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -9936,7 +9906,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -10204,13 +10173,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 0
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -10224,7 +10191,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -20394,13 +20360,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 0
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -20414,7 +20378,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -21225,13 +21188,11 @@ MonoBehaviour:
   AmmoMax: 3
   InfinityAmmo: 1
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -21245,7 +21206,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -21670,13 +21630,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 1
   ReloadTime: 1
-  ShowHUD: 1
-  ShowCrosshair: 1
-  CrosshairTexture: {fileID: 2800000, guid: 0f1f7ce1d16679442abddbea63f991a9, type: 3}
-  TargetLockOnTexture: {fileID: 2800000, guid: bc4ee973b9e81854a881e05b13b18d5c, type: 3}
-  TargetLockedTexture: {fileID: 2800000, guid: 0bf4fc32f7d0d0a4f9b18e59362a60b1, type: 3}
   DistanceLock: 500
   TimeToLock: 0.2
+  ShowCrosshair: 1
+  CrosshairTexture: {fileID: 2800000, guid: 0f1f7ce1d16679442abddbea63f991a9, type: 3}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -21690,7 +21648,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -21927,13 +21884,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 1
   ReloadTime: 1
-  ShowHUD: 1
-  ShowCrosshair: 1
-  CrosshairTexture: {fileID: 2800000, guid: 0f1f7ce1d16679442abddbea63f991a9, type: 3}
-  TargetLockOnTexture: {fileID: 2800000, guid: bc4ee973b9e81854a881e05b13b18d5c, type: 3}
-  TargetLockedTexture: {fileID: 2800000, guid: 0bf4fc32f7d0d0a4f9b18e59362a60b1, type: 3}
   DistanceLock: 500
   TimeToLock: 2
+  ShowCrosshair: 1
+  CrosshairTexture: {fileID: 2800000, guid: 0f1f7ce1d16679442abddbea63f991a9, type: 3}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -21947,7 +21902,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -22372,13 +22326,11 @@ MonoBehaviour:
   AmmoMax: 3
   InfinityAmmo: 1
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -22392,7 +22344,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -22903,13 +22854,11 @@ MonoBehaviour:
   AmmoMax: 10
   InfinityAmmo: 0
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -22923,7 +22872,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
@@ -23836,13 +23784,11 @@ MonoBehaviour:
   AmmoMax: 3
   InfinityAmmo: 1
   ReloadTime: 5
-  ShowHUD: 1
-  ShowCrosshair: 0
-  CrosshairTexture: {fileID: 0}
-  TargetLockOnTexture: {fileID: 0}
-  TargetLockedTexture: {fileID: 0}
   DistanceLock: 200
   TimeToLock: 2
+  ShowCrosshair: 0
+  CrosshairTexture: {fileID: 0}
+  CrosshairObject: {fileID: 0}
   Shell: {fileID: 0}
   ShellLifeTime: 4
   ShellOuter: []
@@ -23856,7 +23802,6 @@ MonoBehaviour:
   SoundReloaded: {fileID: 0}
   Reloading: 0
   ReloadingProcess: 0
-  CrosshairObject: {fileID: 0}
   Icon: {fileID: 0}
   AimPoint: {x: 0, y: 0, z: 0}
   AimObject: {fileID: 0}
