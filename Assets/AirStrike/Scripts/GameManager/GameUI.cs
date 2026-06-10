@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using HWRWeaponSystem;
 using UnityEngine.SceneManagement;
 
@@ -15,6 +16,7 @@ namespace AirStrikeKit
         private WeaponController weapon;
         private TargetIndicatorWorldUI lockedTargetIndicator;
         private TargetIndicatorWorldUI lockingTargetIndicator;
+        private readonly List<TargetIndicatorWorldUI> targetIndicators = new List<TargetIndicatorWorldUI>();
 
         void Awake()
         {
@@ -197,6 +199,7 @@ namespace AirStrikeKit
             {
                 SetTargetIndicatorVisible(lockedTargetIndicator, false);
                 SetTargetIndicatorVisible(lockingTargetIndicator, false);
+                HideUnusedTargetIndicators(0);
                 return;
             }
 
@@ -204,16 +207,24 @@ namespace AirStrikeKit
             GameObject lockedTarget = weapon.LockedTarget;
             GameObject lockCandidate = weapon.LockCandidate;
             bool showLockingTarget = lockCandidate != null && lockCandidate != lockedTarget;
+            List<GameObject> displayTargets = CollectDisplayTargets(lockedTarget, lockCandidate);
 
             if (lockedTargetIndicator != null)
             {
-                lockedTargetIndicator.UpdateIndicatorTarget(lockedTarget, indicatorCamera, 1f, true);
+                lockedTargetIndicator.UpdateIndicatorTarget(lockedTarget, indicatorCamera, 1f, true, lockedTarget != null, true);
             }
 
             if (lockingTargetIndicator != null)
             {
-                lockingTargetIndicator.UpdateIndicatorTarget(lockCandidate, indicatorCamera, weapon.LockProgress, false, showLockingTarget);
+                lockingTargetIndicator.UpdateIndicatorTarget(lockCandidate, indicatorCamera, weapon.LockProgress, false, showLockingTarget, true);
             }
+
+            EnsureTargetIndicatorPool(displayTargets.Count);
+            for (int i = 0; i < displayTargets.Count; i++)
+            {
+                targetIndicators[i].UpdateIndicatorTarget(displayTargets[i], indicatorCamera, 1f, false, true, false);
+            }
+            HideUnusedTargetIndicators(displayTargets.Count);
         }
 
         private void SetTargetIndicatorVisible(TargetIndicatorWorldUI indicator, bool visible)
@@ -221,6 +232,56 @@ namespace AirStrikeKit
             if (indicator != null)
             {
                 indicator.UpdateIndicatorTarget(null, null, 0f, false, visible);
+            }
+        }
+
+        private List<GameObject> CollectDisplayTargets(GameObject lockedTarget, GameObject lockCandidate)
+        {
+            List<GameObject> result = new List<GameObject>();
+            if (weapon == null || weapon.TargetTag == null || WeaponSystem.Finder == null)
+            {
+                return result;
+            }
+
+            for (int t = 0; t < weapon.TargetTag.Length; t++)
+            {
+                HWRWeaponSystem.TargetCollector collector = WeaponSystem.Finder.FindTargetTag(weapon.TargetTag[t]);
+                if (collector == null || collector.Targets == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < collector.Targets.Length; i++)
+                {
+                    GameObject target = collector.Targets[i];
+                    if (target == null || target == lockedTarget || target == lockCandidate)
+                    {
+                        continue;
+                    }
+
+                    if (!result.Contains(target))
+                    {
+                        result.Add(target);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private void EnsureTargetIndicatorPool(int count)
+        {
+            while (targetIndicators.Count < count)
+            {
+                targetIndicators.Add(CreateTargetIndicatorInstance("Target_" + targetIndicators.Count));
+            }
+        }
+
+        private void HideUnusedTargetIndicators(int usedCount)
+        {
+            for (int i = usedCount; i < targetIndicators.Count; i++)
+            {
+                SetTargetIndicatorVisible(targetIndicators[i], false);
             }
         }
 
@@ -249,6 +310,15 @@ namespace AirStrikeKit
             {
                 Destroy(lockingTargetIndicator.gameObject);
             }
+
+            for (int i = 0; i < targetIndicators.Count; i++)
+            {
+                if (targetIndicators[i] != null)
+                {
+                    Destroy(targetIndicators[i].gameObject);
+                }
+            }
+            targetIndicators.Clear();
         }
     }
 }

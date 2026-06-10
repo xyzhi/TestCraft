@@ -13,6 +13,7 @@ namespace AirStrikeKit
 
         private Canvas rootCanvas;
         private Image lockProgress;
+        private GameObject lockProgressObject;
         private Image healthBarFill;
         private Text targetName;
         private Text distanceText;
@@ -23,6 +24,7 @@ namespace AirStrikeKit
         {
             rootCanvas = GetComponent<Canvas>();
             lockProgress = FindImage("LockProgress");
+            lockProgressObject = lockProgress != null ? lockProgress.gameObject : null;
             healthBarFill = FindImage("HealthBarFill");
             targetName = FindText("TargetName");
             distanceText = FindText("DistanceText");
@@ -30,10 +32,15 @@ namespace AirStrikeKit
 
         public void UpdateIndicatorTarget(GameObject target, Camera worldCamera, float progress, bool locked)
         {
-            UpdateIndicatorTarget(target, worldCamera, progress, locked, target != null);
+            UpdateIndicatorTarget(target, worldCamera, progress, locked, target != null, true);
         }
 
         public void UpdateIndicatorTarget(GameObject target, Camera worldCamera, float progress, bool locked, bool visible)
+        {
+            UpdateIndicatorTarget(target, worldCamera, progress, locked, visible, true);
+        }
+
+        public void UpdateIndicatorTarget(GameObject target, Camera worldCamera, float progress, bool locked, bool visible, bool showLockVisuals)
         {
             if (!visible || target == null || worldCamera == null)
             {
@@ -53,6 +60,11 @@ namespace AirStrikeKit
             if (rootCanvas != null)
             {
                 rootCanvas.worldCamera = worldCamera;
+            }
+
+            if (lockProgressObject != null)
+            {
+                lockProgressObject.SetActive(showLockVisuals);
             }
 
             if (lockProgress != null)
