@@ -10,55 +10,78 @@ namespace HWRWeaponSystem
 	public class WeaponLauncher : WeaponBase
 	{
 		// 当前发射器是否处于激活状态，只有激活武器才会执行瞄准、HUD 和开火逻辑。
+		// 当前发射器是否处于激活状态，只有激活武器才会执行瞄准、HUD 和开火逻辑。
 		public bool OnActive;
 		[Header ("Aiming")]
 		// 是否启用锁敌导引逻辑，通常用于导弹类武器。
+		// 是否启用锁敌逻辑，通常用于导弹或跟踪类武器。
 		public bool Seeker;
 		// 是否按照屏幕中心/鼠标位置做屏幕射线瞄准。
+		// 是否按屏幕中心或鼠标位置做屏幕射线瞄准。
 		public bool OnScreenAiming;
 		// 可锁定目标与武器前向的最小夹角点积，越大越严格。
+		// 可锁定目标与武器前向的最小点积阈值，越大越接近正前方。
 		public float AimDirection = 0.8f;
 		// 最大瞄准射线距离。
+		// 射线瞄准的最大距离。
 		public int MaxAimRange = 10000;
 		// 是否让准星吸附到射线命中的真实物体表面。
+		// 是否让准星吸附到射线命中的真实表面。
 		public bool SnapCrosshair = true;
 
 		[Header ("Projectile")]
 		// 导弹/子弹发射口列表，可用于左右挂点轮流出弹。
+		// 导弹或子弹的发射口列表，可用于多挂点轮流出弹。
 		public Transform[] MissileOuter;
+		// 实际生成的弹体预制体。
 		// 实际生成的弹体预制体。
 		public GameObject Missile;
 		// 射速间隔。
+		// 两次开火之间的最小间隔。
 		public float FireRate = 0.1f;
+		// 散布范围，用于模拟机炮散射。
 		// 散布范围，用于模拟机炮散射。
 		public float Spread = 1;
 		// 刚体弹体发射力度。
+		// 刚体弹体发射时施加的力度。
 		public float ForceShoot = 8000;
 		// 一次开火生成的弹丸数量。
+		// 单次开火生成的弹丸数量。
 		public int NumBullet = 1;
 		// 当前弹药数。
+		// 当前弹药数量。
 		public int Ammo = 10;
 		// 单次装填后的最大弹药数。
+		// 单次装填完成后的最大弹药数量。
 		public int AmmoMax = 10;
 		// 是否无限弹药。
+		// 是否拥有无限弹药。
 		public bool InfinityAmmo = false;
+		// 换弹耗时。
 		// 换弹耗时。
 		public float ReloadTime = 1;
 
 		[Header ("HUD")]
 		// 是否显示传统 HUD。
+		// 是否显示传统 HUD。
 		public bool ShowHUD = true;
+		// 是否显示准星。
 		// 是否显示准星。
 		public bool ShowCrosshair = true;
 		// 普通准星贴图。
+		// 普通准星贴图。
 		public Texture2D CrosshairTexture;
 		// 锁定中提示贴图。
+		// 锁定中的提示贴图。
 		public Texture2D TargetLockOnTexture;
 		// 已锁定提示贴图。
+		// 已完成锁定的提示贴图。
 		public Texture2D TargetLockedTexture;
 		// 最大锁定距离。
+		// 可锁定目标的最大距离。
 		public float DistanceLock = 200;
 		// 达成锁定所需时间。
+		// 从开始跟踪到完成锁定所需的时间。
 		public float TimeToLock = 2;
 
 		[Header ("VR HUD")]
@@ -77,26 +100,36 @@ namespace HWRWeaponSystem
 
 		[Header ("Other FX")]
 		// 弹壳预制体。
+		// 抛壳特效预制体。
 		public GameObject Shell;
 		// 弹壳存在时间。
+		// 抛壳存在时间。
 		public float ShellLifeTime = 4;
 		// 弹壳抛出位置列表。
+		// 抛壳弹出的挂点列表。
 		public Transform[] ShellOuter;
 		// 弹壳推出力度。
+		// 抛壳推出力度。
 		public int ShellOutForce = 300;
+		// 枪口火焰预制体。
 		// 枪口火焰预制体。
 		public GameObject Muzzle;
 		// 枪口火焰存在时间。
+		// 枪口火焰存在时间。
 		public float MuzzleLifeTime = 2;
 		// 开火时镜头震动强度。
+		// 开火时对镜头或武器施加的震动强度。
 		public Vector3 ShakeForce = Vector3.up;
 
 		[Header ("Sound FX")]
 		// 开火音效列表，支持随机播放。
+		// 开火音效列表，支持随机播放。
 		public AudioClip[] SoundGun;
 		// 开始装填时音效。
+		// 开始换弹时播放的音效。
 		public AudioClip SoundReloading;
 		// 装填完成时音效。
+		// 换弹完成时播放的音效。
 		public AudioClip SoundReloaded;
 
 		// 锁定计时起点，用于计算持续锁定时间。
@@ -114,10 +147,13 @@ namespace HWRWeaponSystem
 		private AudioSource audioSource;
 		[HideInInspector]
 		// 当前是否正在装填。
+		// 当前是否正处于换弹中。
 		public bool Reloading;
 		[HideInInspector]
 		// 当前装填进度，供外部 UI 读取。
+		// 当前换弹进度，供外部 UI 读取。
 		public float ReloadingProcess;
+		// 可选的准星对象预制体。
 		// 可选的准星对象预制体。
 		public GameObject CrosshairObject;
 		// 运行时实例化出的传统准星对象。
@@ -126,6 +162,7 @@ namespace HWRWeaponSystem
 		private GameObject vrCrosshair;
 		// VR 准星使用的运行时材质。
 		private Material vrCrosshairMaterial;
+		// 武器在 UI 中显示的图标。
 		// 武器在 UI 中显示的图标。
 		public Texture2D Icon;
 
@@ -153,6 +190,7 @@ namespace HWRWeaponSystem
 
 		[HideInInspector]
 		// 当前瞄准命中的世界坐标。
+		// 当前瞄准命中的世界坐标。
 		public Vector3 AimPoint;
 		//[HideInInspector]
 		// 当前瞄准命中的物体。
@@ -163,6 +201,7 @@ namespace HWRWeaponSystem
 		// 可选的外部瞄准源，VR 模式下一般由头显或手柄提供。
 		public Transform AimOverride;
 		// 可选的外部瞄准相机，用于替代主相机进行屏幕射线。
+		// 外部瞄准相机，用于替代主相机执行屏幕射线。
 		public Camera AimCameraOverride;
 
 		// 根据当前瞄准模式计算命中点和命中物体。
@@ -214,6 +253,48 @@ namespace HWRWeaponSystem
 
 		}
 
+		private GameObject FindBestLockCandidate ()
+		{
+			GameObject bestCandidate = null;
+			float bestDistance = float.MaxValue;
+
+			for (int t = 0; t < TargetTag.Length; t++) {
+				if (AimObject != null && AimObject.tag == TargetTag [t]) {
+					float aimDistance = Vector3.Distance (AimObject.transform.position, transform.position);
+					if (aimDistance < DistanceLock && aimDistance < bestDistance) {
+						bestDistance = aimDistance;
+						bestCandidate = AimObject;
+					}
+				}
+
+				TargetCollector collector = WeaponSystem.Finder.FindTargetTag (TargetTag [t]);
+				if (collector == null) {
+					continue;
+				}
+
+				GameObject[] objs = collector.Targets;
+				for (int i = 0; i < objs.Length; i++) {
+					if (objs [i] == null || objs [i] == AimObject) {
+						continue;
+					}
+
+					Vector3 dir = (objs [i].transform.position - transform.position).normalized;
+					float direction = Vector3.Dot (dir, transform.forward);
+					if (direction < AimDirection) {
+						continue;
+					}
+
+					float distance = Vector3.Distance (objs [i].transform.position, transform.position);
+					if (distance < DistanceLock && distance < bestDistance) {
+						bestDistance = distance;
+						bestCandidate = objs [i];
+					}
+				}
+			}
+
+			return bestCandidate;
+		}
+
 		// 激活状态下持续刷新瞄准射线，保证物理命中点稳定。
 		void FixedUpdate ()
 		{
@@ -242,58 +323,9 @@ namespace HWRWeaponSystem
 				}
 				if (Seeker)
 				{
-
-					for (int t = 0; t < TargetTag.Length; t++)
-					{
-						TargetCollector collector = WeaponSystem.Finder.FindTargetTag(TargetTag[t]);
-
-						if (collector != null)
-						{
-							GameObject[] objs = collector.Targets;
-							float distance = int.MaxValue;
-
-							if (AimObject != null && AimObject.tag == TargetTag[t])
-							{
-								float dis = Vector3.Distance(AimObject.transform.position, transform.position);
-								if (DistanceLock > dis)
-								{
-									if (distance > dis)
-									{
-										if (timetolockcount + TimeToLock < Time.time)
-										{
-											distance = dis;
-											SetLockedTarget (AimObject);
-										}
-									}
-								}
-							}
-							else
-							{
-								for (int i = 0; i < objs.Length; i++)
-								{
-									if (objs[i])
-									{
-										Vector3 dir = (objs[i].transform.position - transform.position).normalized;
-										float direction = Vector3.Dot(dir, transform.forward);
-										float dis = Vector3.Distance(objs[i].transform.position, transform.position);
-										if (direction >= AimDirection)
-										{
-											if (DistanceLock > dis)
-											{
-												if (distance > dis)
-												{
-													if (timetolockcount + TimeToLock < Time.time)
-													{
-														distance = dis;
-														SetLockedTarget (objs[i]);
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
+					GameObject candidate = FindBestLockCandidate ();
+					if (weaponController != null) {
+						weaponController.UpdateLockCandidate (candidate, TimeToLock);
 					}
 				}
 				if (Reloading)
@@ -337,6 +369,7 @@ namespace HWRWeaponSystem
 		}
 
 		// 当前用于 HUD 与屏幕瞄准的相机引用。
+		// 当前武器使用的瞄准相机。
 		public Camera CurrentCamera;
 
 		// 绘制目标锁定框与目标距离信息。
@@ -509,24 +542,27 @@ namespace HWRWeaponSystem
 			}
 
 			if (OnActive) {
-				if (target) {
-					DrawTargetLockon (target.transform, true);
-				}
+				bool useWorldTargetIndicator = AirStrikeGame.gameUI != null && AirStrikeGame.gameUI.TargetIndicatorPrefab != null;
+				if (!useWorldTargetIndicator) {
+					if (target) {
+						DrawTargetLockon (target.transform, true);
+					}
 
-				if (Seeker) {
+					if (Seeker) {
 
-					for (int t = 0; t < TargetTag.Length; t++) {
-						TargetCollector collector = WeaponSystem.Finder.FindTargetTag (TargetTag [t]);
-						if (collector != null) {
-							GameObject[] objs = collector.Targets;
-							for (int i = 0; i < objs.Length; i++) {
-								if (objs [i]) {
-									Vector3 dir = (objs [i].transform.position - transform.position).normalized;
-									float direction = Vector3.Dot (dir, transform.forward);
-									if (direction >= AimDirection) {
-										float dis = Vector3.Distance (objs [i].transform.position, transform.position);
-										if (DistanceLock > dis) {
-											DrawTargetLockon (objs [i].transform, false);
+						for (int t = 0; t < TargetTag.Length; t++) {
+							TargetCollector collector = WeaponSystem.Finder.FindTargetTag (TargetTag [t]);
+							if (collector != null) {
+								GameObject[] objs = collector.Targets;
+								for (int i = 0; i < objs.Length; i++) {
+									if (objs [i]) {
+										Vector3 dir = (objs [i].transform.position - transform.position).normalized;
+										float direction = Vector3.Dot (dir, transform.forward);
+										if (direction >= AimDirection) {
+											float dis = Vector3.Distance (objs [i].transform.position, transform.position);
+											if (DistanceLock > dis) {
+												DrawTargetLockon (objs [i].transform, false);
+											}
 										}
 									}
 								}
@@ -566,9 +602,6 @@ namespace HWRWeaponSystem
 			}
 
 			if (weaponController != null) {
-				if (weaponController.LockedTarget == null) {
-					weaponController.ClearLockedTarget ();
-				}
 				target = weaponController.LockedTarget;
 			}
 		}
@@ -588,6 +621,7 @@ namespace HWRWeaponSystem
 		private int currentOuter = 0;
 
 		// 执行一次实际开火，包含出弹、后坐、枪口火焰、弹壳和音效。
+		// 执行一次开火流程，并生成弹体、特效与音效。
 		public void Shoot ()
 		{
 			if (InfinityAmmo) {

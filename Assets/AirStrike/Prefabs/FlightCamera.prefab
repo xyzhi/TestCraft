@@ -151,6 +151,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skin: {fileID: 11400000, guid: 50285467941e99e47aefdf0e105912ec, type: 2}
   Logo: {fileID: 2800000, guid: 42b83d84354a1c44983b46bc6dc17618, type: 3}
+  TargetIndicatorPrefab: {fileID: 100000, guid: 4d2f2de5300d4ea8a44a53f4e1d77ec2, type: 3}
   Mode: 0
 --- !u!1 &116050
 GameObject:

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using HWRWeaponSystem;
 using UnityEngine.SceneManagement;
@@ -7,12 +7,14 @@ namespace AirStrikeKit
 {
     public class GameUI : MonoBehaviour
     {
-
         public GUISkin skin;
         public Texture2D Logo;
+        public GameObject TargetIndicatorPrefab;
         public int Mode;
-        private WeaponController weapon;
 
+        private WeaponController weapon;
+        private TargetIndicatorWorldUI lockedTargetIndicator;
+        private TargetIndicatorWorldUI lockingTargetIndicator;
 
         void Awake()
         {
@@ -21,7 +23,21 @@ namespace AirStrikeKit
 
         void Start()
         {
-            weapon = AirStrikeGame.playerController.GetComponent<WeaponController>();
+            if (AirStrikeGame.playerController)
+            {
+                weapon = AirStrikeGame.playerController.GetComponent<WeaponController>();
+            }
+        }
+
+        void Update()
+        {
+            if (AirStrikeGame.playerController && weapon == null)
+            {
+                weapon = AirStrikeGame.playerController.GetComponent<WeaponController>();
+            }
+
+            EnsureTargetIndicators();
+            UpdateTargetIndicators();
         }
 
         public void TogglePause()
@@ -43,10 +59,8 @@ namespace AirStrikeKit
 
         public void OnGUI()
         {
-
             if (skin)
                 GUI.skin = skin;
-
 
             switch (Mode)
             {
@@ -58,7 +72,6 @@ namespace AirStrikeKit
 
                     if (AirStrikeGame.playerController)
                     {
-
                         AirStrikeGame.playerController.Active = true;
 
                         if (AirStrikeGame.playerController.IsVRActive)
@@ -75,7 +88,6 @@ namespace AirStrikeKit
                         GUI.Label(new Rect(Screen.width - 220, 20, 200, 50), "ARMOR " + AirStrikeGame.playerController.GetComponent<DamageManager>().HP);
                         GUI.skin.label.fontSize = 16;
 
-
                         if (weapon.WeaponLists[weapon.CurrentWeapon].Icon)
                             GUI.DrawTexture(new Rect(Screen.width - 100, Screen.height - 100, 80, 80), weapon.WeaponLists[weapon.CurrentWeapon].Icon);
 
@@ -91,10 +103,8 @@ namespace AirStrikeKit
                                 GUI.Label(new Rect(Screen.width - 230, Screen.height - 120, 200, 30), weapon.WeaponLists[weapon.CurrentWeapon].Ammo.ToString());
                         }
 
-
                         GUI.skin.label.alignment = TextAnchor.UpperLeft;
                         GUI.Label(new Rect(20, Screen.height - 50, 250, 30), "R Mouse : Switch Guns C : Change Camera");
-
                     }
                     else
                     {
@@ -147,9 +157,98 @@ namespace AirStrikeKit
                         SceneManager.LoadScene("StarFighter");
                     }
                     break;
+            }
+        }
 
+        private void EnsureTargetIndicators()
+        {
+            if (TargetIndicatorPrefab == null || weapon == null)
+            {
+                return;
             }
 
+            if (lockedTargetIndicator == null)
+            {
+                lockedTargetIndicator = CreateTargetIndicatorInstance("Locked");
+            }
+
+            if (lockingTargetIndicator == null)
+            {
+                lockingTargetIndicator = CreateTargetIndicatorInstance("Locking");
+            }
+        }
+
+        private TargetIndicatorWorldUI CreateTargetIndicatorInstance(string suffix)
+        {
+            GameObject indicatorObject = (GameObject)Instantiate(TargetIndicatorPrefab);
+            indicatorObject.name = TargetIndicatorPrefab.name + "_" + suffix;
+
+            TargetIndicatorWorldUI indicator = indicatorObject.GetComponent<TargetIndicatorWorldUI>();
+            if (indicator == null)
+            {
+                indicator = indicatorObject.AddComponent<TargetIndicatorWorldUI>();
+            }
+            return indicator;
+        }
+
+        private void UpdateTargetIndicators()
+        {
+            if (weapon == null)
+            {
+                SetTargetIndicatorVisible(lockedTargetIndicator, false);
+                SetTargetIndicatorVisible(lockingTargetIndicator, false);
+                return;
+            }
+
+            Camera indicatorCamera = GetIndicatorCamera();
+            GameObject lockedTarget = weapon.LockedTarget;
+            GameObject lockCandidate = weapon.LockCandidate;
+            bool showLockingTarget = lockCandidate != null && lockCandidate != lockedTarget;
+
+            if (lockedTargetIndicator != null)
+            {
+                lockedTargetIndicator.UpdateIndicatorTarget(lockedTarget, indicatorCamera, 1f, true);
+            }
+
+            if (lockingTargetIndicator != null)
+            {
+                lockingTargetIndicator.UpdateIndicatorTarget(lockCandidate, indicatorCamera, weapon.LockProgress, false, showLockingTarget);
+            }
+        }
+
+        private void SetTargetIndicatorVisible(TargetIndicatorWorldUI indicator, bool visible)
+        {
+            if (indicator != null)
+            {
+                indicator.UpdateIndicatorTarget(null, null, 0f, false, visible);
+            }
+        }
+
+        private Camera GetIndicatorCamera()
+        {
+            if (weapon != null)
+            {
+                WeaponLauncher currentWeapon = weapon.GetCurrentWeapon();
+                if (currentWeapon != null && currentWeapon.CurrentCamera != null)
+                {
+                    return currentWeapon.CurrentCamera;
+                }
+            }
+
+            return Camera.main;
+        }
+
+        private void OnDestroy()
+        {
+            if (lockedTargetIndicator != null)
+            {
+                Destroy(lockedTargetIndicator.gameObject);
+            }
+
+            if (lockingTargetIndicator != null)
+            {
+                Destroy(lockingTargetIndicator.gameObject);
+            }
         }
     }
 }

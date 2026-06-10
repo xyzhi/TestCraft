@@ -113,6 +113,7 @@
     <Compile Include="Assets\AirStrike\Scripts\FlightIndicator\Indicator.cs" />
     <Compile Include="Assets\AirStrike\Scripts\Componet\RadarSystem.cs" />
     <Compile Include="Assets\AirStrike\Scripts\FlightSystem\FlightOnHit.cs" />
+    <Compile Include="Assets\AirStrike\Scripts\GameManager\TargetIndicatorWorldUI.cs" />
     <Compile Include="Assets\AirStrike\Scripts\WeaponSystem\CameraShaker.cs" />
     <Compile Include="Assets\AirStrike\Scripts\FlightIndicator\ModernIndicator.cs" />
     <Compile Include="Assets\AirStrike\Scripts\Player\EnemyDead.cs" />
