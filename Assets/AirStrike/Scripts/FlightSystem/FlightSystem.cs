@@ -193,6 +193,9 @@ namespace AirStrikeKit
 
 		private float speedDelta;
 		private int speedMode;
+		public bool IsBoosting {
+			get { return speedMode > 0; }
+		}
 		// Speed up
 		public void SpeedUp (float delta)
 		{

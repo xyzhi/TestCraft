@@ -431,7 +431,16 @@ namespace HWRWeaponSystem
 
 			Shader shader = Shader.Find ("Unlit/Transparent");
 			if (shader == null) {
+				shader = Shader.Find ("Unlit/Texture");
+			}
+			if (shader == null) {
+				shader = Shader.Find ("Mobile/Particles/Alpha Blended");
+			}
+			if (shader == null) {
 				shader = Shader.Find ("Sprites/Default");
+			}
+			if (shader == null) {
+				shader = Shader.Find ("UI/Default");
 			}
 			if (shader == null) {
 				return;
@@ -450,6 +459,7 @@ namespace HWRWeaponSystem
 			vrCrosshairMaterial = new Material (shader);
 			vrCrosshairMaterial.mainTexture = CrosshairTexture;
 			vrCrosshairMaterial.color = Color.white;
+			vrCrosshairMaterial.renderQueue = 3000;
 
 			Renderer renderer = vrCrosshair.GetComponent<Renderer> ();
 			if (renderer != null) {

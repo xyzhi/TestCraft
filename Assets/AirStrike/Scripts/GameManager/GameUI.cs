@@ -1,8 +1,8 @@
-using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using HWRWeaponSystem;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace AirStrikeKit
 {
@@ -11,12 +11,22 @@ namespace AirStrikeKit
         public GUISkin skin;
         public Texture2D Logo;
         public GameObject TargetIndicatorPrefab;
+        public GameObject UIPrefab;
+        public Texture2D DefaultGunIcon;
+        public Texture2D DefaultMissileIcon;
+        public Texture2D DefaultHeavyMissileIcon;
+        public Texture2D DefaultBombIcon;
+        public string PCCanvasName = "PCCanvas";
+        public string VRCanvasName = "MainCanvas";
         public int Mode;
 
         private WeaponController weapon;
+        private GameUIView pcView;
+        private GameUIView vrView;
         private TargetIndicatorWorldUI lockedTargetIndicator;
         private TargetIndicatorWorldUI lockingTargetIndicator;
         private readonly List<TargetIndicatorWorldUI> targetIndicators = new List<TargetIndicatorWorldUI>();
+        private readonly Dictionary<Texture2D, Sprite> spriteCache = new Dictionary<Texture2D, Sprite>();
 
         void Awake()
         {
@@ -29,6 +39,10 @@ namespace AirStrikeKit
             {
                 weapon = AirStrikeGame.playerController.GetComponent<WeaponController>();
             }
+
+            EnsureCanvasViews();
+            BindViewButtons(pcView);
+            BindViewButtons(vrView);
         }
 
         void Update()
@@ -38,6 +52,10 @@ namespace AirStrikeKit
                 weapon = AirStrikeGame.playerController.GetComponent<WeaponController>();
             }
 
+            EnsureCanvasViews();
+            HandlePauseInput();
+            UpdateGameplayState();
+            UpdateCanvasViews();
             EnsureTargetIndicators();
             UpdateTargetIndicators();
         }
@@ -45,7 +63,9 @@ namespace AirStrikeKit
         public void TogglePause()
         {
             if (Mode == 1)
+            {
                 return;
+            }
 
             if (Mode == 2)
             {
@@ -59,107 +79,309 @@ namespace AirStrikeKit
             }
         }
 
-        public void OnGUI()
+        private void HandlePauseInput()
         {
-            if (skin)
-                GUI.skin = skin;
+            if (Mode == 0 && Input.GetKeyDown(KeyCode.Escape))
+            {
+                Mode = 2;
+            }
+        }
+
+        private void UpdateGameplayState()
+        {
+            if (AirStrikeGame.playerController == null)
+            {
+                AirStrikeGame.playerController = (PlayerController)GameObject.FindObjectOfType(typeof(PlayerController));
+                if (AirStrikeGame.playerController != null)
+                {
+                    weapon = AirStrikeGame.playerController.GetComponent<WeaponController>();
+                }
+            }
 
             switch (Mode)
             {
                 case 0:
-                    if (Input.GetKeyDown(KeyCode.Escape))
-                    {
-                        Mode = 2;
-                    }
-
-                    if (AirStrikeGame.playerController)
+                    if (AirStrikeGame.playerController != null)
                     {
                         AirStrikeGame.playerController.Active = true;
-
-                        if (AirStrikeGame.playerController.IsVRActive)
-                        {
-                            break;
-                        }
-
-                        GUI.skin.label.alignment = TextAnchor.UpperLeft;
-                        GUI.skin.label.fontSize = 30;
-                        GUI.Label(new Rect(20, 20, 200, 50), "Kills " + AirStrikeGame.gameManager.Killed.ToString());
-                        GUI.Label(new Rect(20, 60, 200, 50), "Score " + AirStrikeGame.gameManager.Score.ToString());
-
-                        GUI.skin.label.alignment = TextAnchor.UpperRight;
-                        GUI.Label(new Rect(Screen.width - 220, 20, 200, 50), "ARMOR " + AirStrikeGame.playerController.GetComponent<DamageManager>().HP);
-                        GUI.skin.label.fontSize = 16;
-
-                        if (weapon.WeaponLists[weapon.CurrentWeapon].Icon)
-                            GUI.DrawTexture(new Rect(Screen.width - 100, Screen.height - 100, 80, 80), weapon.WeaponLists[weapon.CurrentWeapon].Icon);
-
-                        GUI.skin.label.alignment = TextAnchor.UpperRight;
-                        if (weapon.WeaponLists[weapon.CurrentWeapon].Ammo <= 0 && weapon.WeaponLists[weapon.CurrentWeapon].ReloadingProcess > 0)
-                        {
-                            if (!weapon.WeaponLists[weapon.CurrentWeapon].InfinityAmmo)
-                                GUI.Label(new Rect(Screen.width - 230, Screen.height - 120, 200, 30), "Reloading " + Mathf.Floor((1 - weapon.WeaponLists[weapon.CurrentWeapon].ReloadingProcess) * 100) + "%");
-                        }
-                        else
-                        {
-                            if (!weapon.WeaponLists[weapon.CurrentWeapon].InfinityAmmo)
-                                GUI.Label(new Rect(Screen.width - 230, Screen.height - 120, 200, 30), weapon.WeaponLists[weapon.CurrentWeapon].Ammo.ToString());
-                        }
-
-                        GUI.skin.label.alignment = TextAnchor.UpperLeft;
-                        GUI.Label(new Rect(20, Screen.height - 50, 250, 30), "R Mouse : Switch Guns C : Change Camera");
                     }
-                    else
+                    if (Time.timeScale == 0)
                     {
-                        AirStrikeGame.playerController = (PlayerController)GameObject.FindObjectOfType(typeof(PlayerController));
-                        if (AirStrikeGame.playerController)
-                            weapon = AirStrikeGame.playerController.GetComponent<WeaponController>();
+                        Time.timeScale = 1;
                     }
                     break;
                 case 1:
-                    if (AirStrikeGame.playerController)
+                    if (AirStrikeGame.playerController != null)
+                    {
                         AirStrikeGame.playerController.Active = false;
-
+                    }
                     MouseLock.MouseLocked = false;
-
-                    GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                    GUI.Label(new Rect(0, Screen.height / 2 + 10, Screen.width, 30), "Game Over");
-
-                    GUI.DrawTexture(new Rect(Screen.width / 2 - Logo.width / 2, Screen.height / 2 - 150, Logo.width, Logo.height), Logo);
-
-                    if (GUI.Button(new Rect(Screen.width / 2 - 150, Screen.height / 2 + 50, 300, 40), "Restart"))
-                    {
-                        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-                    }
-                    if (GUI.Button(new Rect(Screen.width / 2 - 150, Screen.height / 2 + 100, 300, 40), "Back to StarFighter"))
-                    {
-                        SceneManager.LoadScene("StarFighter");
-                    }
                     break;
-
                 case 2:
-                    if (AirStrikeGame.playerController)
+                    if (AirStrikeGame.playerController != null)
+                    {
                         AirStrikeGame.playerController.Active = false;
-
-                    MouseLock.MouseLocked = false;
-                    Time.timeScale = 0;
-                    GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                    GUI.Label(new Rect(0, Screen.height / 2 + 10, Screen.width, 30), "Pause");
-
-                    GUI.DrawTexture(new Rect(Screen.width / 2 - Logo.width / 2, Screen.height / 2 - 150, Logo.width, Logo.height), Logo);
-
-                    if (GUI.Button(new Rect(Screen.width / 2 - 150, Screen.height / 2 + 50, 300, 40), "Resume"))
-                    {
-                        Mode = 0;
-                        Time.timeScale = 1;
                     }
-                    if (GUI.Button(new Rect(Screen.width / 2 - 150, Screen.height / 2 + 100, 300, 40), "Back to StarFighter"))
+                    MouseLock.MouseLocked = false;
+                    if (Time.timeScale != 0)
                     {
-                        Time.timeScale = 1;
-                        Mode = 0;
-                        SceneManager.LoadScene("StarFighter");
+                        Time.timeScale = 0;
                     }
                     break;
             }
+        }
+
+        private void UpdateCanvasViews()
+        {
+            bool isVrActive = AirStrikeGame.playerController != null && AirStrikeGame.playerController.IsVRActive;
+
+            UpdateView(pcView, false, !isVrActive);
+            UpdateView(vrView, true, isVrActive);
+        }
+
+        private void UpdateView(GameUIView view, bool isVrLayout, bool visible)
+        {
+            if (view == null)
+            {
+                return;
+            }
+
+            view.SetRootVisible(visible);
+            if (!visible)
+            {
+                return;
+            }
+
+            bool showHud = Mode == 0;
+            view.SetHudVisible(showHud);
+
+            if (showHud)
+            {
+                UpdateHud(view);
+            }
+
+            switch (Mode)
+            {
+                case 0:
+                    view.SetOverlayVisible(false);
+                    break;
+                case 1:
+                    UpdateOverlay(view, "Game Over", "Restart", true);
+                    break;
+                case 2:
+                    UpdateOverlay(view, "Pause", "Resume", true);
+                    break;
+            }
+        }
+
+        private void UpdateHud(GameUIView view)
+        {
+            if (AirStrikeGame.gameManager != null)
+            {
+                view.SetText(view.KillsText, "Kills " + AirStrikeGame.gameManager.Killed);
+                view.SetText(view.ScoreText, "Score " + AirStrikeGame.gameManager.Score);
+            }
+            else
+            {
+                view.SetText(view.KillsText, "Kills 0");
+                view.SetText(view.ScoreText, "Score 0");
+            }
+
+            DamageManager playerDamage = AirStrikeGame.playerController != null
+                ? AirStrikeGame.playerController.GetComponent<DamageManager>()
+                : null;
+            view.SetText(view.ArmorText, "ARMOR " + (playerDamage != null ? playerDamage.HP.ToString() : "0"));
+            view.SetText(view.HintText, "R Mouse : Switch Guns C : Change Camera");
+
+            if (weapon == null || weapon.WeaponLists == null || weapon.WeaponLists.Length == 0)
+            {
+                view.SetWeaponIcon(null, false);
+                view.SetText(view.AmmoText, string.Empty);
+                return;
+            }
+
+            WeaponLauncher currentWeapon = weapon.GetCurrentWeapon();
+            if (currentWeapon == null)
+            {
+                view.SetWeaponIcon(null, false);
+                view.SetText(view.AmmoText, string.Empty);
+                return;
+            }
+
+            Texture2D weaponIconTexture = GetWeaponIconTexture(currentWeapon);
+            Sprite iconSprite = CreateSpriteFromTexture(weaponIconTexture);
+            view.SetWeaponIcon(iconSprite, weaponIconTexture != null);
+
+            if (currentWeapon.InfinityAmmo)
+            {
+                view.SetText(view.AmmoText, string.Empty);
+                return;
+            }
+
+            if (currentWeapon.Ammo <= 0 && currentWeapon.ReloadingProcess > 0)
+            {
+                view.SetText(view.AmmoText, "Reloading " + Mathf.Floor((1 - currentWeapon.ReloadingProcess) * 100) + "%");
+            }
+            else
+            {
+                view.SetText(view.AmmoText, currentWeapon.Ammo.ToString());
+            }
+        }
+
+        private void UpdateOverlay(GameUIView view, string title, string primaryButtonText, bool showButtons)
+        {
+            view.SetOverlayVisible(true);
+            view.SetOverlayButtonsVisible(showButtons);
+            view.SetText(view.OverlayTitleText, title);
+            view.SetText(view.PrimaryButtonText, primaryButtonText);
+            view.SetText(view.SecondaryButtonText, "Back to StarFighter");
+        }
+
+        private void EnsureCanvasViews()
+        {
+            if (UIPrefab == null)
+            {
+                return;
+            }
+
+            if (pcView == null)
+            {
+                pcView = CreateViewUnderCanvas(PCCanvasName, "PC");
+                BindViewButtons(pcView);
+            }
+
+            if (vrView == null)
+            {
+                vrView = CreateViewUnderCanvas(VRCanvasName, "VR");
+                BindViewButtons(vrView);
+            }
+        }
+
+        private GameUIView CreateViewUnderCanvas(string canvasName, string suffix)
+        {
+            GameObject canvasObject = GameObject.Find(canvasName);
+            if (canvasObject == null)
+            {
+                return null;
+            }
+
+            GameUIView existingView = canvasObject.GetComponentInChildren<GameUIView>(true);
+            if (existingView != null)
+            {
+                existingView.name = "GameUI_" + suffix;
+                return existingView;
+            }
+
+            GameObject viewObject = (GameObject)Instantiate(UIPrefab);
+            viewObject.name = "GameUI_" + suffix;
+
+            RectTransform viewTransform = viewObject.GetComponent<RectTransform>();
+            RectTransform canvasTransform = canvasObject.GetComponent<RectTransform>();
+            if (viewTransform != null && canvasTransform != null)
+            {
+                viewTransform.SetParent(canvasTransform, false);
+                viewTransform.anchorMin = Vector2.zero;
+                viewTransform.anchorMax = Vector2.one;
+                viewTransform.offsetMin = Vector2.zero;
+                viewTransform.offsetMax = Vector2.zero;
+                viewTransform.localScale = Vector3.one;
+            }
+            else
+            {
+                viewObject.transform.SetParent(canvasObject.transform, false);
+            }
+
+            return viewObject.GetComponent<GameUIView>();
+        }
+
+        private void BindViewButtons(GameUIView view)
+        {
+            if (view == null)
+            {
+                return;
+            }
+
+            if (view.PrimaryButton != null)
+            {
+                view.PrimaryButton.onClick.RemoveAllListeners();
+                view.PrimaryButton.onClick.AddListener(HandlePrimaryButtonClicked);
+            }
+
+            if (view.SecondaryButton != null)
+            {
+                view.SecondaryButton.onClick.RemoveAllListeners();
+                view.SecondaryButton.onClick.AddListener(HandleBackToStarFighterClicked);
+            }
+        }
+
+        private void HandlePrimaryButtonClicked()
+        {
+            if (Mode == 1)
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                return;
+            }
+
+            if (Mode == 2)
+            {
+                Mode = 0;
+                Time.timeScale = 1;
+            }
+        }
+
+        private void HandleBackToStarFighterClicked()
+        {
+            Time.timeScale = 1;
+            Mode = 0;
+            SceneManager.LoadScene("StarFighter");
+        }
+
+        private Sprite CreateSpriteFromTexture(Texture2D texture)
+        {
+            if (texture == null)
+            {
+                return null;
+            }
+
+            Sprite cachedSprite;
+            if (spriteCache.TryGetValue(texture, out cachedSprite))
+            {
+                return cachedSprite;
+            }
+
+            cachedSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            spriteCache[texture] = cachedSprite;
+            return cachedSprite;
+        }
+
+        private Texture2D GetWeaponIconTexture(WeaponLauncher currentWeapon)
+        {
+            if (currentWeapon == null)
+            {
+                return null;
+            }
+
+            if (currentWeapon.Icon != null)
+            {
+                return currentWeapon.Icon;
+            }
+
+            if (currentWeapon.Seeker)
+            {
+                if (currentWeapon.DistanceLock <= 20f)
+                {
+                    return DefaultBombIcon != null ? DefaultBombIcon : DefaultMissileIcon;
+                }
+
+                if (currentWeapon.AmmoMax <= 2 || currentWeapon.ReloadTime >= 3f)
+                {
+                    return DefaultMissileIcon != null ? DefaultMissileIcon : DefaultHeavyMissileIcon;
+                }
+
+                return DefaultHeavyMissileIcon != null ? DefaultHeavyMissileIcon : DefaultMissileIcon;
+            }
+
+            return DefaultGunIcon;
         }
 
         private void EnsureTargetIndicators()
@@ -319,6 +541,15 @@ namespace AirStrikeKit
                 }
             }
             targetIndicators.Clear();
+
+            foreach (KeyValuePair<Texture2D, Sprite> pair in spriteCache)
+            {
+                if (pair.Value != null)
+                {
+                    Destroy(pair.Value);
+                }
+            }
+            spriteCache.Clear();
         }
     }
 }

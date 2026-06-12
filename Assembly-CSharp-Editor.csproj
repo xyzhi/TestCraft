@@ -60,6 +60,7 @@
     <Analyzer Include="D:\Program Files\Unity\Editor\2022.3.61f1c1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Editor\ModelShadowTool.cs" />
     <Compile Include="Assets\Editor\XRDeviceSimulatorConfigurator.cs" />
   </ItemGroup>
   <ItemGroup>

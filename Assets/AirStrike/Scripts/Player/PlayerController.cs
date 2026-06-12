@@ -63,6 +63,7 @@ namespace AirStrikeKit
 		private bool vrViewPressed;
 		// 当前是否正在使用 VR 输入逻辑。
 		private bool useVrInput;
+		private Coroutine waitForVRReadyCoroutine;
 		#if ENABLE_INPUT_SYSTEM
 		// 左手主摇杆输入 action。
 		private InputAction leftPrimary2DAxisAction;
@@ -104,10 +105,10 @@ namespace AirStrikeKit
 			fireTouch = new TouchScreenVal (new Rect (Screen.width / 2, 0, Screen.width / 2, Screen.height));
 			switchTouch = new TouchScreenVal (new Rect (0, Screen.height - 100, Screen.width / 2, 100));
 			sliceTouch = new TouchScreenVal (new Rect (0, 0, Screen.width / 2, 50));
-			useVrInput = XRSettings.isDeviceActive || IsEditorSimulatorActive ();
-			if (useVrInput) {
-				SetupVRActions ();
-				RefreshVRState ();
+			if (ShouldUseVRInput ()) {
+				EnableVRInput ();
+			} else {
+				waitForVRReadyCoroutine = StartCoroutine (WaitForVRDeviceReady ());
 			}
 		}
 
@@ -115,6 +116,37 @@ namespace AirStrikeKit
 		void OnDestroy ()
 		{
 			DisposeVRActions ();
+		}
+
+		private bool ShouldUseVRInput ()
+		{
+			return XRSettings.isDeviceActive || IsEditorSimulatorActive ();
+		}
+
+		private void EnableVRInput ()
+		{
+			if (useVrInput)
+				return;
+
+			useVrInput = true;
+			SetupVRActions ();
+			RefreshVRState ();
+		}
+
+		private IEnumerator WaitForVRDeviceReady ()
+		{
+			const float timeout = 10f;
+			float startTime = Time.realtimeSinceStartup;
+			while (!useVrInput && Time.realtimeSinceStartup - startTime < timeout) {
+				if (ShouldUseVRInput ()) {
+					EnableVRInput ();
+					yield break;
+				}
+
+				yield return null;
+			}
+
+			waitForVRReadyCoroutine = null;
 		}
 
 		// 每帧根据当前运行环境切换到 VR、桌面或移动端输入。
@@ -403,7 +435,7 @@ namespace AirStrikeKit
 			return provider;
 		}
 
-		// 桌面版输入：鼠标控制姿态，键盘控制偏航和油门。
+		// 桌面版输入：W/S 控制三档速度，A/D 控制左右侧飞，鼠标控制俯仰与偏航。
 		void DesktopController ()
 		{
 			// Desktop controller
@@ -411,15 +443,19 @@ namespace AirStrikeKit
 		
 			// lock mouse position to the center.
 			MouseLock.MouseLocked = true;
-		
-			flight.AxisControl (new Vector2 (Input.GetAxis ("Mouse X"), Input.GetAxis ("Mouse Y")));
 
-			if (SimpleControl) {
-				flight.TurnControl (Input.GetAxis ("Mouse X"));
-			} 
+			// 键盘横向输入对应 VR 右手摇杆 X：左右侧飞。
+			float keyboardStrafe = Input.GetAxis ("Horizontal");
+			// 鼠标纵向输入对应 VR 左手摇杆 Y：上下转向中的俯仰。
+			float mousePitch = -Input.GetAxis ("Mouse Y");
+			// 鼠标横向输入对应 VR 左手摇杆 X：左右转向中的偏航。
+			float mouseYaw = Input.GetAxis ("Mouse X");
+			// 键盘纵向输入对应 VR 右手摇杆 Y：三档速度控制。
+			float keyboardSpeed = Input.GetAxis ("Vertical");
 
-			flight.TurnControl (Input.GetAxis ("Horizontal"));
-			flight.SpeedUp (Input.GetAxis ("Vertical"));
+			flight.AxisControl (new Vector2 (keyboardStrafe, mousePitch));
+			flight.TurnControl (mouseYaw);
+			flight.SpeedUp (keyboardSpeed);
 		
 		
 			if (Input.GetButton ("Fire1")) {
@@ -479,6 +515,8 @@ namespace AirStrikeKit
 
 			if (useVrInput) {
 				GUI.Label (new Rect (20, 390, 500, 40), "VR Left Stick : Yaw/Pitch  Right Stick : Roll/3-Speed  Trigger : Fire");
+			} else {
+				GUI.Label (new Rect (20, 390, 500, 40), "PC Mouse : Yaw/Pitch  A/D : Strafe  W/S : 3-Speed  Left Click : Fire");
 			}
 		
 			if (GUI.Button (new Rect (20, 200, 200, 40), "Change Weapons")) {
