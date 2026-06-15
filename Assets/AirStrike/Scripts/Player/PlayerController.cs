@@ -3,6 +3,7 @@
 /// </summary>
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.XR;
 using HWRWeaponSystem;
 #if ENABLE_INPUT_SYSTEM
@@ -64,6 +65,7 @@ namespace AirStrikeKit
 		// 当前是否正在使用 VR 输入逻辑。
 		private bool useVrInput;
 		private Coroutine waitForVRReadyCoroutine;
+		private static readonly List<XRDisplaySubsystem> xrDisplaySubsystems = new List<XRDisplaySubsystem> ();
 		#if ENABLE_INPUT_SYSTEM
 		// 左手主摇杆输入 action。
 		private InputAction leftPrimary2DAxisAction;
@@ -120,7 +122,18 @@ namespace AirStrikeKit
 
 		private bool ShouldUseVRInput ()
 		{
-			return XRSettings.isDeviceActive || IsEditorSimulatorActive ();
+			return XRSettings.isDeviceActive || IsXRDisplayRunning () || IsEditorSimulatorActive ();
+		}
+
+		private bool IsXRDisplayRunning ()
+		{
+			xrDisplaySubsystems.Clear ();
+			SubsystemManager.GetInstances (xrDisplaySubsystems);
+			for (int i = 0; i < xrDisplaySubsystems.Count; i++) {
+				if (xrDisplaySubsystems [i] != null && xrDisplaySubsystems [i].running)
+					return true;
+			}
+			return false;
 		}
 
 		private void EnableVRInput ()

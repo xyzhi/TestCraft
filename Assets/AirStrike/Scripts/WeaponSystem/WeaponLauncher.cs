@@ -396,15 +396,16 @@ namespace HWRWeaponSystem
 				targetPosition += direction * VRCrosshairSurfaceOffset;
 			}
 
+			Vector3 faceCameraDirection = (cameraPosition - targetPosition).normalized;
 			vrCrosshair.transform.position = targetPosition;
-			vrCrosshair.transform.forward = (targetPosition - cameraPosition).normalized;
+			vrCrosshair.transform.forward = faceCameraDirection;
 
 			float scale = Mathf.Clamp (distance * VRCrosshairScalePerMeter, VRMinCrosshairScale, VRMaxCrosshairScale);
 			vrCrosshair.transform.localScale = new Vector3 (scale, scale, scale);
 
 			if (crosshair != null) {
 				crosshair.transform.position = targetPosition;
-				crosshair.transform.forward = (targetPosition - cameraPosition).normalized;
+				crosshair.transform.forward = faceCameraDirection;
 			}
 
 			SetVRWorldCrosshairActive (true);
@@ -460,6 +461,9 @@ namespace HWRWeaponSystem
 			vrCrosshairMaterial.mainTexture = CrosshairTexture;
 			vrCrosshairMaterial.color = Color.white;
 			vrCrosshairMaterial.renderQueue = 3000;
+			if (vrCrosshairMaterial.HasProperty ("_Cull")) {
+				vrCrosshairMaterial.SetInt ("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
+			}
 
 			Renderer renderer = vrCrosshair.GetComponent<Renderer> ();
 			if (renderer != null) {
